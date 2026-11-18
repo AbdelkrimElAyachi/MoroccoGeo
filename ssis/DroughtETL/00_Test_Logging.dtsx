@@ -1,0 +1,173 @@
+<?xml version="1.0"?>
+<DTS:Executable xmlns:DTS="www.microsoft.com/SqlServer/Dts"
+  DTS:refId="Package"
+  DTS:CreationDate="11/18/2026 3:00:00 PM"
+  DTS:CreationName="Microsoft.Package"
+  DTS:CreatorComputerName="DESKTOP-4D3VER8"
+  DTS:CreatorName="DESKTOP-4D3VER8\USER"
+  DTS:Description="Phase 0 test: writes Running, then Success or Failed, in DWH_DB.etl.RunLog. Set User::ForceFailure = True to test the failure path."
+  DTS:DTSID="{47EB5364-6D96-42E2-8A0B-0398DC2034B3}"
+  DTS:ExecutableType="Microsoft.Package"
+  DTS:LastModifiedProductVersion="17.0.1016.0"
+  DTS:LocaleID="1033"
+  DTS:ObjectName="00_Test_Logging"
+  DTS:PackageType="5"
+  DTS:VersionBuild="1"
+  DTS:VersionGUID="{0C2185FB-6942-4F55-885D-DC60C51CA789}">
+  <DTS:Property
+    DTS:Name="PackageFormatVersion">8</DTS:Property>
+  <DTS:ConnectionManagers>
+    <DTS:ConnectionManager
+      DTS:refId="Package.ConnectionManagers[DWH_DB]"
+      DTS:CreationName="OLEDB"
+      DTS:DTSID="{9C8FEB06-FAFE-477C-81CD-FD6EC5328FFC}"
+      DTS:ObjectName="DWH_DB">
+      <DTS:ObjectData>
+        <DTS:ConnectionManager
+          DTS:ConnectRetryCount="1"
+          DTS:ConnectRetryInterval="5"
+          DTS:ConnectionString="Data Source=localhost;Initial Catalog=DWH_DB;Provider=MSOLEDBSQL;Integrated Security=SSPI;Auto Translate=False;Application Name=SSIS-00_Test_Logging;" />
+      </DTS:ObjectData>
+    </DTS:ConnectionManager>
+  </DTS:ConnectionManagers>
+  <DTS:Variables>
+    <DTS:Variable
+      DTS:CreationName=""
+      DTS:DTSID="{42B0073D-9D64-4776-99BC-592F43DB550F}"
+      DTS:IncludeInDebugDump="2345"
+      DTS:Namespace="User"
+      DTS:ObjectName="ForceFailure">
+      <DTS:VariableValue
+        DTS:DataType="11">0</DTS:VariableValue>
+    </DTS:Variable>
+    <DTS:Variable
+      DTS:CreationName=""
+      DTS:DTSID="{11358EE4-9D71-432D-8A2D-4E659BE0DD0B}"
+      DTS:IncludeInDebugDump="2345"
+      DTS:Namespace="User"
+      DTS:ObjectName="RunID">
+      <DTS:VariableValue
+        DTS:DataType="3">0</DTS:VariableValue>
+    </DTS:Variable>
+  </DTS:Variables>
+  <DTS:Executables>
+    <DTS:Executable
+      DTS:refId="Package\SQL Do Work"
+      DTS:CreationName="Microsoft.ExecuteSQLTask"
+      DTS:Description="Placeholder for real work"
+      DTS:DTSID="{9A800772-7D4C-46B8-B846-8E3D9C42A5CB}"
+      DTS:ExecutableType="Microsoft.ExecuteSQLTask"
+      DTS:LocaleID="-1"
+      DTS:ObjectName="SQL Do Work"
+      DTS:ThreadHint="0">
+      <DTS:Variables />
+      <DTS:PropertyExpression
+        DTS:Name="SqlStatementSource">@[User::ForceFailure] ? "RAISERROR('Forced test failure', 16, 1);" : "SELECT 1;"</DTS:PropertyExpression>
+      <DTS:ObjectData>
+        <SQLTask:SqlTaskData
+          SQLTask:Connection="{9C8FEB06-FAFE-477C-81CD-FD6EC5328FFC}"
+          SQLTask:SqlStatementSource="SELECT 1;" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask" />
+      </DTS:ObjectData>
+    </DTS:Executable>
+    <DTS:Executable
+      DTS:refId="Package\SQL End Run Success"
+      DTS:CreationName="Microsoft.ExecuteSQLTask"
+      DTS:Description="Calls etl.usp_EndRun with Success"
+      DTS:DTSID="{CB32D2EC-F6DA-4A11-BCDE-19B8DD99C086}"
+      DTS:ExecutableType="Microsoft.ExecuteSQLTask"
+      DTS:LocaleID="-1"
+      DTS:ObjectName="SQL End Run Success"
+      DTS:ThreadHint="0">
+      <DTS:Variables />
+      <DTS:PropertyExpression
+        DTS:Name="SqlStatementSource">"EXEC etl.usp_EndRun @RunID = " + (DT_WSTR, 12) @[User::RunID] + ", @Status = 'Success', @RowsLoaded = 0;"</DTS:PropertyExpression>
+      <DTS:ObjectData>
+        <SQLTask:SqlTaskData
+          SQLTask:Connection="{9C8FEB06-FAFE-477C-81CD-FD6EC5328FFC}"
+          SQLTask:SqlStatementSource="EXEC etl.usp_EndRun @RunID = 0, @Status = 'Success', @RowsLoaded = 0;" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask" />
+      </DTS:ObjectData>
+    </DTS:Executable>
+    <DTS:Executable
+      DTS:refId="Package\SQL Start Run"
+      DTS:CreationName="Microsoft.ExecuteSQLTask"
+      DTS:Description="Calls etl.usp_StartRun and stores the RunID"
+      DTS:DTSID="{4BF55A57-8A10-476B-9775-D73F6FD9E61D}"
+      DTS:ExecutableType="Microsoft.ExecuteSQLTask"
+      DTS:LocaleID="-1"
+      DTS:ObjectName="SQL Start Run"
+      DTS:ThreadHint="0">
+      <DTS:Variables />
+      <DTS:PropertyExpression
+        DTS:Name="SqlStatementSource">"DECLARE @id INT; EXEC etl.usp_StartRun @PackageName = N'" + @[System::PackageName] + "', @RunID = @id OUTPUT; SELECT @id AS RunID;"</DTS:PropertyExpression>
+      <DTS:ObjectData>
+        <SQLTask:SqlTaskData
+          SQLTask:Connection="{9C8FEB06-FAFE-477C-81CD-FD6EC5328FFC}"
+          SQLTask:SqlStatementSource="DECLARE @id INT; EXEC etl.usp_StartRun @PackageName = N'00_Test_Logging', @RunID = @id OUTPUT; SELECT @id AS RunID;"
+          SQLTask:ResultType="ResultSetType_SingleRow" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask">
+          <SQLTask:ResultBinding
+            SQLTask:ResultName="RunID"
+            SQLTask:DtsVariableName="User::RunID" />
+        </SQLTask:SqlTaskData>
+      </DTS:ObjectData>
+    </DTS:Executable>
+  </DTS:Executables>
+  <DTS:PrecedenceConstraints>
+    <DTS:PrecedenceConstraint
+      DTS:refId="Package.PrecedenceConstraints[Start to Work]"
+      DTS:CreationName=""
+      DTS:DTSID="{DA8A20E3-9769-4F9C-9AA3-684AC42ADD5E}"
+      DTS:From="Package\SQL Start Run"
+      DTS:LogicalAnd="True"
+      DTS:ObjectName="Start to Work"
+      DTS:To="Package\SQL Do Work" />
+    <DTS:PrecedenceConstraint
+      DTS:refId="Package.PrecedenceConstraints[Work to End]"
+      DTS:CreationName=""
+      DTS:DTSID="{20A4D8F9-E836-4473-A620-97CC4FBF4789}"
+      DTS:From="Package\SQL Do Work"
+      DTS:LogicalAnd="True"
+      DTS:ObjectName="Work to End"
+      DTS:To="Package\SQL End Run Success" />
+  </DTS:PrecedenceConstraints>
+  <DTS:EventHandlers>
+    <DTS:EventHandler
+      DTS:refId="Package.EventHandlers[OnError]"
+      DTS:CreationName="OnError"
+      DTS:DTSID="{FC02CD54-E3A0-40E7-8C69-48AA8ECD9C8E}"
+      DTS:EventID="0"
+      DTS:EventName="OnError"
+      DTS:LocaleID="-1">
+      <DTS:Variables>
+        <DTS:Variable
+          DTS:CreationName=""
+          DTS:Description="Propriété de propagation de l'événement"
+          DTS:DTSID="{6FC20A25-D634-417A-A113-6AFD3E4EFA4E}"
+          DTS:IncludeInDebugDump="6789"
+          DTS:Namespace="System"
+          DTS:ObjectName="Propagate">
+          <DTS:VariableValue
+            DTS:DataType="11">-1</DTS:VariableValue>
+        </DTS:Variable>
+      </DTS:Variables>
+      <DTS:Executables>
+        <DTS:Executable
+          DTS:refId="Package.EventHandlers[OnError]\SQL End Run Failed"
+          DTS:CreationName="Microsoft.ExecuteSQLTask"
+          DTS:Description="Calls etl.usp_EndRun with Failed and the error text"
+          DTS:DTSID="{A52FD252-B595-46F8-A73A-BD489F74F9BD}"
+          DTS:ExecutableType="Microsoft.ExecuteSQLTask"
+          DTS:LocaleID="-1"
+          DTS:ObjectName="SQL End Run Failed">
+          <DTS:Variables />
+          <DTS:PropertyExpression
+            DTS:Name="SqlStatementSource">"EXEC etl.usp_EndRun @RunID = " + (DT_WSTR, 12) @[User::RunID] + ", @Status = 'Failed', @RowsLoaded = 0, @ErrorMessage = N'" + SUBSTRING(REPLACE(@[System::ErrorDescription], "'", "''"), 1, 3500) + "';"</DTS:PropertyExpression>
+          <DTS:ObjectData>
+            <SQLTask:SqlTaskData
+              SQLTask:Connection="{9C8FEB06-FAFE-477C-81CD-FD6EC5328FFC}"
+              SQLTask:SqlStatementSource="EXEC etl.usp_EndRun @RunID = 0, @Status = 'Failed', @RowsLoaded = 0, @ErrorMessage = N'';" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask" />
+          </DTS:ObjectData>
+        </DTS:Executable>
+      </DTS:Executables>
+    </DTS:EventHandler>
+  </DTS:EventHandlers>
+</DTS:Executable>

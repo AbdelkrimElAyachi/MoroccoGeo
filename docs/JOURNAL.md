@@ -73,8 +73,42 @@ output (pandas). `earthengine-api` (Step 11) and `scikit-learn` (Step 15) will b
 (see `.gitignore`) because they are large and can be rebuilt. Each finished piece of work
 gets its own commit.
 
-**Still to do in Phase 0:**
-- [ ] SQL Server engine + Agent startup type -> Automatic
-- [ ] Run `sql/01_create_databases.sql` and `sql/02_etl_logging.sql`
-- [ ] Run `sql/tests/02_test_etl_logging.sql` and check results
-- [ ] SSIS test package that writes Success / Failed in `etl.RunLog`
+**Step 2 SQL done:** `Staging_DB` and `DWH_DB` created (SIMPLE recovery), `etl.RunLog`
+and the procedures `etl.usp_StartRun` / `etl.usp_EndRun` created. SQL test passed
+(one Success row, one Failed row).
+
+**Decision: SQL Server engine and Agent stay on Manual startup** (saves RAM when not
+working on the project). Start them in `services.msc` before working. Note: the monthly
+automatic run (Step 17) needs Agent running at the scheduled time.
+
+**SSIS test package** `ssis/packages/00_Test_Logging.dtsx`:
+`SQL Start Run` (calls `usp_StartRun`, stores `User::RunID`) -> `SQL Do Work` (does nothing,
+or raises an error when `User::ForceFailure` = True) -> `SQL End Run Success`.
+An `OnError` event handler calls `usp_EndRun` with `Failed` and the error text.
+Connection: OLE DB, provider MSOLEDBSQL, `localhost`, `DWH_DB`, Windows login.
+
+Tested with DTExec (`ssis/tests/run_00_test_logging.ps1`):
+- Success path: exit code 0, RunLog row `Success`
+- Forced failure: exit code 1, RunLog row `Failed` with the error text
+
+**Phase 0 complete.**
+
+---
+
+## 2026-11-18: Phase 1 start, Visual Studio SSIS project
+
+Created the SSIS project `ssis/DroughtETL` (solution `DroughtETL.slnx`) in Visual Studio 2026:
+- Deployment model: Project. TargetServerVersion: SQL Server 2025.
+- Shared connections: `DWH_DB.conmgr`, `Staging_DB.conmgr`
+  (Microsoft OLE DB Driver for SQL Server, `localhost`, Windows login, Trust Server Certificate = True).
+- Project parameters: `ProjectRoot` = `D:\DroughtProject`,
+  `PythonExe` = `D:\DroughtProject\venv\Scripts\python.exe`.
+- `00_Test_Logging.dtsx` added to the project (old copy in `ssis/packages/` removed);
+  default `Package.dtsx` deleted.
+
+Problem met: the connection dialog said "Sélectionnez un fournisseur .Net" because the
+provider box showed the category "OLE DB natif". Fix: expand it and pick
+"Microsoft OLE DB Driver for SQL Server".
+
+Tests: package run with F5 in Visual Studio (green, RunLog = Success) and with DTExec
+from the project folder (exit code 0, RunLog = Success).

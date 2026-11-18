@@ -7,8 +7,8 @@ Status: ✅ done · 🟡 in progress · ⏳ not started
 
 | Step | What | Checks | Status |
 |---|---|---|---|
-| 1 | Install tools | SQL engine, Agent, SSAS (Tabular), SSIS running; SSMS connects; VS has SSIS/Tabular/Report templates; Python imports OK | 🟡 (engine + Agent still Manual) |
-| 2 | Project skeleton | `Staging_DB` + `DWH_DB` exist; `etl.RunLog` + procedures; SSIS test package logs Success; failing package logs Failed | 🟡 (folders + venv done) |
+| 1 | Install tools | SQL engine, Agent, SSAS (Tabular), SSIS running; SSMS connects; VS has SSIS/Tabular/Report templates; Python imports OK | ✅ (engine + Agent kept on Manual by choice) |
+| 2 | Project skeleton | `Staging_DB` + `DWH_DB` exist; `etl.RunLog` + procedures; SSIS test package logs Success; failing package logs Failed | ✅ (SSIS test package `00_Test_Logging` logs Success and Failed) |
 
 ## Phase 1: Foundations
 
