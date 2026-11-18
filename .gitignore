@@ -1,0 +1,15 @@
+# Python environment (rebuild with: python -m venv venv + pip install)
+venv/
+__pycache__/
+
+# Downloaded and generated data (can be re-downloaded / regenerated)
+raw/
+clean/
+
+# Visual Studio / SSIS build output and user files
+ssis/**/bin/
+ssis/**/obj/
+ssis/**/.vs/
+*.user
+*.suo
+*.database
