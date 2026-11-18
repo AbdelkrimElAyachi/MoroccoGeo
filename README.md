@@ -34,8 +34,9 @@ Sources (CHIRPS, Open-Meteo, MODIS, JRC/Sentinel-2, FAOSTAT, HCP, geoBoundaries)
 2. Run the scripts in `sql/` in number order, in SSMS
 3. Create the Python environment:
    `python -m venv venv` then
-   `venv\Scripts\python.exe -m pip install rasterio geopandas rasterstats pandas scipy`
-4. Open the SSIS project in `ssis/` and run the master package
+   `venv\Scripts\python.exe -m pip install -r requirements.txt`
+4. Open `ssis/DroughtETL/DroughtETL.slnx` in Visual Studio and run the packages in number order
+   (or run `ssis/tests/run_phase1.ps1`)
 
 ## Documents
 

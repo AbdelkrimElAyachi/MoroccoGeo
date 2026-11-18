@@ -1,0 +1,239 @@
+<?xml version="1.0"?>
+<DTS:Executable xmlns:DTS="www.microsoft.com/SqlServer/Dts"
+  DTS:refId="Package"
+  DTS:CreationDate="11/18/2026 5:00:00 PM"
+  DTS:CreationName="Microsoft.Package"
+  DTS:CreatorComputerName="DESKTOP-4D3VER8"
+  DTS:CreatorName="DESKTOP-4D3VER8\USER"
+  DTS:Description="Step 3: downloads Morocco province boundaries (Python), loads the province list into Staging_DB.stg.Boundaries, logs the run in DWH_DB.etl.RunLog."
+  DTS:DTSID="{4266036E-5201-4184-B11A-999115A3563E}"
+  DTS:ExecutableType="Microsoft.Package"
+  DTS:LastModifiedProductVersion="17.0.1016.0"
+  DTS:LocaleID="1033"
+  DTS:ObjectName="01_Boundaries"
+  DTS:PackageType="5"
+  DTS:VersionBuild="1"
+  DTS:VersionGUID="{8EA95CDB-825F-4B0B-B9CC-35DE07D18FCE}">
+  <DTS:Property
+    DTS:Name="PackageFormatVersion">8</DTS:Property>
+  <DTS:ConnectionManagers>
+    <DTS:ConnectionManager
+      DTS:refId="Package.ConnectionManagers[DWH_DB]"
+      DTS:CreationName="OLEDB"
+      DTS:DTSID="{57BCF65F-FDE6-4B46-BD5F-0E1B7162228D}"
+      DTS:ObjectName="DWH_DB">
+      <DTS:ObjectData>
+        <DTS:ConnectionManager
+          DTS:ConnectRetryCount="1"
+          DTS:ConnectRetryInterval="5"
+          DTS:ConnectionString="Data Source=localhost;Initial Catalog=DWH_DB;Provider=MSOLEDBSQL;Integrated Security=SSPI;Trust Server Certificate=True;Auto Translate=False;Application Name=SSIS-01_Boundaries;" />
+      </DTS:ObjectData>
+    </DTS:ConnectionManager>
+    <DTS:ConnectionManager
+      DTS:refId="Package.ConnectionManagers[Staging_DB]"
+      DTS:CreationName="OLEDB"
+      DTS:DTSID="{A46EE5C0-8C04-4C24-8867-00F414A1A6E3}"
+      DTS:ObjectName="Staging_DB">
+      <DTS:ObjectData>
+        <DTS:ConnectionManager
+          DTS:ConnectRetryCount="1"
+          DTS:ConnectRetryInterval="5"
+          DTS:ConnectionString="Data Source=localhost;Initial Catalog=Staging_DB;Provider=MSOLEDBSQL;Integrated Security=SSPI;Trust Server Certificate=True;Auto Translate=False;Application Name=SSIS-01_Boundaries;" />
+      </DTS:ObjectData>
+    </DTS:ConnectionManager>
+  </DTS:ConnectionManagers>
+  <DTS:Variables>
+    <DTS:Variable
+      DTS:CreationName=""
+      DTS:DTSID="{DCFDF2F0-CFCF-48D2-A564-07379A7F2847}"
+      DTS:IncludeInDebugDump="2345"
+      DTS:Namespace="User"
+      DTS:ObjectName="ProjectRoot">
+      <DTS:VariableValue
+        DTS:DataType="8">D:\DroughtProject</DTS:VariableValue>
+    </DTS:Variable>
+    <DTS:Variable
+      DTS:CreationName=""
+      DTS:DTSID="{C94F2490-8FCB-4AD2-B06F-1587ED832411}"
+      DTS:IncludeInDebugDump="2345"
+      DTS:Namespace="User"
+      DTS:ObjectName="PythonExe">
+      <DTS:VariableValue
+        DTS:DataType="8">D:\DroughtProject\venv\Scripts\python.exe</DTS:VariableValue>
+    </DTS:Variable>
+    <DTS:Variable
+      DTS:CreationName=""
+      DTS:DTSID="{429766E7-B714-40D1-B1AC-77F31EB99941}"
+      DTS:IncludeInDebugDump="2345"
+      DTS:Namespace="User"
+      DTS:ObjectName="RowsLoaded">
+      <DTS:VariableValue
+        DTS:DataType="3">0</DTS:VariableValue>
+    </DTS:Variable>
+    <DTS:Variable
+      DTS:CreationName=""
+      DTS:DTSID="{F73AF13B-6010-4743-8EE4-04C8E58CEE07}"
+      DTS:IncludeInDebugDump="2345"
+      DTS:Namespace="User"
+      DTS:ObjectName="RunID">
+      <DTS:VariableValue
+        DTS:DataType="3">0</DTS:VariableValue>
+    </DTS:Variable>
+  </DTS:Variables>
+  <DTS:Executables>
+    <DTS:Executable
+      DTS:refId="Package\EPT Download And Check Boundaries"
+      DTS:CreationName="Microsoft.ExecuteProcess"
+      DTS:Description="Runs scripts\01_boundaries.py; fails if the script returns a non-zero exit code"
+      DTS:DTSID="{33B31564-95CD-4C11-BD05-9C7197E53F76}"
+      DTS:ExecutableType="Microsoft.ExecuteProcess"
+      DTS:LocaleID="-1"
+      DTS:ObjectName="EPT Download And Check Boundaries"
+      DTS:ThreadHint="0">
+      <DTS:Variables />
+      <DTS:PropertyExpression
+        DTS:Name="Arguments">"\"" + @[User::ProjectRoot] + "\\scripts\\01_boundaries.py\" \"" + @[User::ProjectRoot] + "\""</DTS:PropertyExpression>
+      <DTS:PropertyExpression
+        DTS:Name="Executable">@[User::PythonExe]</DTS:PropertyExpression>
+      <DTS:PropertyExpression
+        DTS:Name="WorkingDirectory">@[User::ProjectRoot]</DTS:PropertyExpression>
+      <DTS:ObjectData>
+        <ExecuteProcessData
+          Executable="D:\DroughtProject\venv\Scripts\python.exe"
+          Arguments="&quot;D:\DroughtProject\scripts\01_boundaries.py&quot; &quot;D:\DroughtProject&quot;"
+          WorkingDirectory="D:\DroughtProject" />
+      </DTS:ObjectData>
+    </DTS:Executable>
+    <DTS:Executable
+      DTS:refId="Package\SQL End Run Success"
+      DTS:CreationName="Microsoft.ExecuteSQLTask"
+      DTS:Description="Calls etl.usp_EndRun with Success and the row count"
+      DTS:DTSID="{B50AD174-EA07-4F19-A44D-D88E4E8594DB}"
+      DTS:ExecutableType="Microsoft.ExecuteSQLTask"
+      DTS:LocaleID="-1"
+      DTS:ObjectName="SQL End Run Success"
+      DTS:ThreadHint="0">
+      <DTS:Variables />
+      <DTS:PropertyExpression
+        DTS:Name="SqlStatementSource">"EXEC etl.usp_EndRun @RunID = " + (DT_WSTR, 12) @[User::RunID] + ", @Status = 'Success', @RowsLoaded = " + (DT_WSTR, 12) @[User::RowsLoaded] + ";"</DTS:PropertyExpression>
+      <DTS:ObjectData>
+        <SQLTask:SqlTaskData
+          SQLTask:Connection="{57BCF65F-FDE6-4B46-BD5F-0E1B7162228D}"
+          SQLTask:SqlStatementSource="EXEC etl.usp_EndRun @RunID = 0, @Status = 'Success', @RowsLoaded = 0;" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask" />
+      </DTS:ObjectData>
+    </DTS:Executable>
+    <DTS:Executable
+      DTS:refId="Package\SQL Load Staging Boundaries"
+      DTS:CreationName="Microsoft.ExecuteSQLTask"
+      DTS:Description="Empties stg.Boundaries, BULK INSERTs the CSV, returns the row count"
+      DTS:DTSID="{5C6E7F3F-FDC5-49F6-878E-504A638F188C}"
+      DTS:ExecutableType="Microsoft.ExecuteSQLTask"
+      DTS:LocaleID="-1"
+      DTS:ObjectName="SQL Load Staging Boundaries"
+      DTS:ThreadHint="0">
+      <DTS:Variables />
+      <DTS:PropertyExpression
+        DTS:Name="SqlStatementSource">"SET NOCOUNT ON; TRUNCATE TABLE stg.Boundaries; BULK INSERT stg.Boundaries FROM '" + @[User::ProjectRoot] + "\\clean\\boundaries_provinces.csv' WITH (FIRSTROW = 2, FIELDTERMINATOR = ';', ROWTERMINATOR = '0x0a', CODEPAGE = '65001'); SELECT COUNT(*) AS RowsLoaded FROM stg.Boundaries;"</DTS:PropertyExpression>
+      <DTS:ObjectData>
+        <SQLTask:SqlTaskData
+          SQLTask:Connection="{A46EE5C0-8C04-4C24-8867-00F414A1A6E3}"
+          SQLTask:SqlStatementSource="SET NOCOUNT ON; TRUNCATE TABLE stg.Boundaries; BULK INSERT stg.Boundaries FROM 'D:\DroughtProject\clean\boundaries_provinces.csv' WITH (FIRSTROW = 2, FIELDTERMINATOR = ';', ROWTERMINATOR = '0x0a', CODEPAGE = '65001'); SELECT COUNT(*) AS RowsLoaded FROM stg.Boundaries;"
+          SQLTask:ResultType="ResultSetType_SingleRow" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask">
+          <SQLTask:ResultBinding
+            SQLTask:ResultName="RowsLoaded"
+            SQLTask:DtsVariableName="User::RowsLoaded" />
+        </SQLTask:SqlTaskData>
+      </DTS:ObjectData>
+    </DTS:Executable>
+    <DTS:Executable
+      DTS:refId="Package\SQL Start Run"
+      DTS:CreationName="Microsoft.ExecuteSQLTask"
+      DTS:Description="Calls etl.usp_StartRun and stores the RunID"
+      DTS:DTSID="{2964F778-00F2-4BD6-9B5B-F9A1724512EC}"
+      DTS:ExecutableType="Microsoft.ExecuteSQLTask"
+      DTS:LocaleID="-1"
+      DTS:ObjectName="SQL Start Run"
+      DTS:ThreadHint="0">
+      <DTS:Variables />
+      <DTS:PropertyExpression
+        DTS:Name="SqlStatementSource">"DECLARE @id INT; EXEC etl.usp_StartRun @PackageName = N'" + @[System::PackageName] + "', @RunID = @id OUTPUT; SELECT @id AS RunID;"</DTS:PropertyExpression>
+      <DTS:ObjectData>
+        <SQLTask:SqlTaskData
+          SQLTask:Connection="{57BCF65F-FDE6-4B46-BD5F-0E1B7162228D}"
+          SQLTask:SqlStatementSource="DECLARE @id INT; EXEC etl.usp_StartRun @PackageName = N'01_Boundaries', @RunID = @id OUTPUT; SELECT @id AS RunID;"
+          SQLTask:ResultType="ResultSetType_SingleRow" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask">
+          <SQLTask:ResultBinding
+            SQLTask:ResultName="RunID"
+            SQLTask:DtsVariableName="User::RunID" />
+        </SQLTask:SqlTaskData>
+      </DTS:ObjectData>
+    </DTS:Executable>
+  </DTS:Executables>
+  <DTS:PrecedenceConstraints>
+    <DTS:PrecedenceConstraint
+      DTS:refId="Package.PrecedenceConstraints[C1]"
+      DTS:CreationName=""
+      DTS:DTSID="{3BA8DB59-1D4A-449E-AEFD-4288A4161150}"
+      DTS:From="Package\SQL Start Run"
+      DTS:LogicalAnd="True"
+      DTS:ObjectName="C1"
+      DTS:To="Package\EPT Download And Check Boundaries" />
+    <DTS:PrecedenceConstraint
+      DTS:refId="Package.PrecedenceConstraints[C2]"
+      DTS:CreationName=""
+      DTS:DTSID="{A58EFBF7-C167-48B2-867F-0AA25E3B56D3}"
+      DTS:From="Package\EPT Download And Check Boundaries"
+      DTS:LogicalAnd="True"
+      DTS:ObjectName="C2"
+      DTS:To="Package\SQL Load Staging Boundaries" />
+    <DTS:PrecedenceConstraint
+      DTS:refId="Package.PrecedenceConstraints[C3]"
+      DTS:CreationName=""
+      DTS:DTSID="{24CF9D60-2E67-4D5A-BF67-BADDECBDD591}"
+      DTS:From="Package\SQL Load Staging Boundaries"
+      DTS:LogicalAnd="True"
+      DTS:ObjectName="C3"
+      DTS:To="Package\SQL End Run Success" />
+  </DTS:PrecedenceConstraints>
+  <DTS:EventHandlers>
+    <DTS:EventHandler
+      DTS:refId="Package.EventHandlers[OnError]"
+      DTS:CreationName="OnError"
+      DTS:DTSID="{A0404281-045C-45C9-A656-FD568C1A1998}"
+      DTS:EventID="0"
+      DTS:EventName="OnError"
+      DTS:LocaleID="-1">
+      <DTS:Variables>
+        <DTS:Variable
+          DTS:CreationName=""
+          DTS:Description="Propriété de propagation de l'événement"
+          DTS:DTSID="{87975064-D451-49AE-A971-42B8256A895C}"
+          DTS:IncludeInDebugDump="6789"
+          DTS:Namespace="System"
+          DTS:ObjectName="Propagate">
+          <DTS:VariableValue
+            DTS:DataType="11">-1</DTS:VariableValue>
+        </DTS:Variable>
+      </DTS:Variables>
+      <DTS:Executables>
+        <DTS:Executable
+          DTS:refId="Package.EventHandlers[OnError]\SQL End Run Failed"
+          DTS:CreationName="Microsoft.ExecuteSQLTask"
+          DTS:Description="Calls etl.usp_EndRun with Failed and the error text"
+          DTS:DTSID="{A0479F6A-61EC-4664-B68E-DBB3C55E8970}"
+          DTS:ExecutableType="Microsoft.ExecuteSQLTask"
+          DTS:LocaleID="-1"
+          DTS:ObjectName="SQL End Run Failed">
+          <DTS:Variables />
+          <DTS:PropertyExpression
+            DTS:Name="SqlStatementSource">"EXEC etl.usp_EndRun @RunID = " + (DT_WSTR, 12) @[User::RunID] + ", @Status = 'Failed', @RowsLoaded = 0, @ErrorMessage = N'" + SUBSTRING(REPLACE(@[System::ErrorDescription], "'", "''"), 1, 3500) + "';"</DTS:PropertyExpression>
+          <DTS:ObjectData>
+            <SQLTask:SqlTaskData
+              SQLTask:Connection="{57BCF65F-FDE6-4B46-BD5F-0E1B7162228D}"
+              SQLTask:SqlStatementSource="EXEC etl.usp_EndRun @RunID = 0, @Status = 'Failed', @RowsLoaded = 0, @ErrorMessage = N'';" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask" />
+          </DTS:ObjectData>
+        </DTS:Executable>
+      </DTS:Executables>
+    </DTS:EventHandler>
+  </DTS:EventHandlers>
+</DTS:Executable>

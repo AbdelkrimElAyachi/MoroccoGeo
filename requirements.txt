@@ -1,0 +1,8 @@
+# Python packages for the project (install into the venv):
+#   venv\Scripts\python.exe -m pip install -r requirements.txt
+rasterio      # read satellite images (GeoTIFF)
+geopandas     # read province outlines
+rasterstats   # average pixels per province
+pandas        # tables and CSV output
+scipy         # SPI drought index (gamma fit)
+openpyxl      # read the HCP census Excel file

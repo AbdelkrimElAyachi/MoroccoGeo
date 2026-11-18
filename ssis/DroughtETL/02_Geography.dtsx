@@ -1,0 +1,268 @@
+﻿<?xml version="1.0"?>
+<DTS:Executable xmlns:DTS="www.microsoft.com/SqlServer/Dts"
+  DTS:refId="Package"
+  DTS:CreationDate="11/18/2026 5:00:00 PM"
+  DTS:CreationName="Microsoft.Package"
+  DTS:CreatorComputerName="DESKTOP-4D3VER8"
+  DTS:CreatorName="DESKTOP-4D3VER8\USER"
+  DTS:Description="Step 4: reads the HCP census 2024 Excel (Python), loads it into Staging_DB.stg.HcpPopulation, builds DWH_DB.dbo.DimGeography, logs the run. Run 01_Boundaries first."
+  DTS:DTSID="{A3789EB4-EA04-456E-AD5C-BB976BEA3BFA}"
+  DTS:ExecutableType="Microsoft.Package"
+  DTS:LastModifiedProductVersion="17.0.1016.0"
+  DTS:LocaleID="1033"
+  DTS:ObjectName="02_Geography"
+  DTS:PackageType="5"
+  DTS:VersionBuild="1"
+  DTS:VersionGUID="{B2E30B20-8335-4A56-909C-D521E88AF2DA}">
+  <DTS:Property
+    DTS:Name="PackageFormatVersion">8</DTS:Property>
+  <DTS:ConnectionManagers>
+    <DTS:ConnectionManager
+      DTS:refId="Package.ConnectionManagers[DWH_DB]"
+      DTS:CreationName="OLEDB"
+      DTS:DTSID="{61C2072A-BF3E-405F-BC3C-8DBD62946430}"
+      DTS:ObjectName="DWH_DB">
+      <DTS:ObjectData>
+        <DTS:ConnectionManager
+          DTS:ConnectRetryCount="1"
+          DTS:ConnectRetryInterval="5"
+          DTS:ConnectionString="Data Source=localhost;Initial Catalog=DWH_DB;Provider=MSOLEDBSQL;Integrated Security=SSPI;Trust Server Certificate=True;Auto Translate=False;Application Name=SSIS-02_Geography;" />
+      </DTS:ObjectData>
+    </DTS:ConnectionManager>
+    <DTS:ConnectionManager
+      DTS:refId="Package.ConnectionManagers[Staging_DB]"
+      DTS:CreationName="OLEDB"
+      DTS:DTSID="{1FFDE9F5-6009-474B-BEAA-9D7B410464AA}"
+      DTS:ObjectName="Staging_DB">
+      <DTS:ObjectData>
+        <DTS:ConnectionManager
+          DTS:ConnectRetryCount="1"
+          DTS:ConnectRetryInterval="5"
+          DTS:ConnectionString="Data Source=localhost;Initial Catalog=Staging_DB;Provider=MSOLEDBSQL;Integrated Security=SSPI;Trust Server Certificate=True;Auto Translate=False;Application Name=SSIS-02_Geography;" />
+      </DTS:ObjectData>
+    </DTS:ConnectionManager>
+  </DTS:ConnectionManagers>
+  <DTS:Variables>
+    <DTS:Variable
+      DTS:CreationName=""
+      DTS:DTSID="{5C15E4C7-34AF-47F2-B8E1-BE50389DF9C0}"
+      DTS:IncludeInDebugDump="2345"
+      DTS:Namespace="User"
+      DTS:ObjectName="ProjectRoot">
+      <DTS:VariableValue
+        DTS:DataType="8">D:\DroughtProject</DTS:VariableValue>
+    </DTS:Variable>
+    <DTS:Variable
+      DTS:CreationName=""
+      DTS:DTSID="{47E55F70-4D55-4B07-80AC-ABB611CBF907}"
+      DTS:IncludeInDebugDump="2345"
+      DTS:Namespace="User"
+      DTS:ObjectName="PythonExe">
+      <DTS:VariableValue
+        DTS:DataType="8">D:\DroughtProject\venv\Scripts\python.exe</DTS:VariableValue>
+    </DTS:Variable>
+    <DTS:Variable
+      DTS:CreationName=""
+      DTS:DTSID="{B137BEE0-7948-4834-AA5B-36F723254882}"
+      DTS:IncludeInDebugDump="2345"
+      DTS:Namespace="User"
+      DTS:ObjectName="RowsLoaded">
+      <DTS:VariableValue
+        DTS:DataType="3">0</DTS:VariableValue>
+    </DTS:Variable>
+    <DTS:Variable
+      DTS:CreationName=""
+      DTS:DTSID="{BFC332E9-BA44-40BC-8717-69E75E7FCD37}"
+      DTS:IncludeInDebugDump="2345"
+      DTS:Namespace="User"
+      DTS:ObjectName="RunID">
+      <DTS:VariableValue
+        DTS:DataType="3">0</DTS:VariableValue>
+    </DTS:Variable>
+  </DTS:Variables>
+  <DTS:Executables>
+    <DTS:Executable
+      DTS:refId="Package\EPT Read HCP Census"
+      DTS:CreationName="Microsoft.ExecuteProcess"
+      DTS:Description="Runs scripts\02_hcp_population.py; fails if a check fails (75 provinces, 12 regions, total 36,828,330)"
+      DTS:DTSID="{7CEF6EB2-7E22-4367-9169-C7BD9A02DF50}"
+      DTS:ExecutableType="Microsoft.ExecuteProcess"
+      DTS:LocaleID="-1"
+      DTS:ObjectName="EPT Read HCP Census"
+      DTS:ThreadHint="0">
+      <DTS:Variables />
+      <DTS:PropertyExpression
+        DTS:Name="Arguments">"\"" + @[User::ProjectRoot] + "\\scripts\\02_hcp_population.py\" \"" + @[User::ProjectRoot] + "\""</DTS:PropertyExpression>
+      <DTS:PropertyExpression
+        DTS:Name="Executable">@[User::PythonExe]</DTS:PropertyExpression>
+      <DTS:PropertyExpression
+        DTS:Name="WorkingDirectory">@[User::ProjectRoot]</DTS:PropertyExpression>
+      <DTS:ObjectData>
+        <ExecuteProcessData
+          Executable="D:\DroughtProject\venv\Scripts\python.exe"
+          Arguments="&quot;D:\DroughtProject\scripts\02_hcp_population.py&quot; &quot;D:\DroughtProject&quot;"
+          WorkingDirectory="D:\DroughtProject" />
+      </DTS:ObjectData>
+    </DTS:Executable>
+    <DTS:Executable
+      DTS:refId="Package\SQL End Run Success"
+      DTS:CreationName="Microsoft.ExecuteSQLTask"
+      DTS:Description="Calls etl.usp_EndRun with Success and the row count"
+      DTS:DTSID="{FC11E00D-AAC2-49B2-A302-6DC0C033C773}"
+      DTS:ExecutableType="Microsoft.ExecuteSQLTask"
+      DTS:LocaleID="-1"
+      DTS:ObjectName="SQL End Run Success"
+      DTS:ThreadHint="0">
+      <DTS:Variables />
+      <DTS:PropertyExpression
+        DTS:Name="SqlStatementSource">"EXEC etl.usp_EndRun @RunID = " + (DT_WSTR, 12) @[User::RunID] + ", @Status = 'Success', @RowsLoaded = " + (DT_WSTR, 12) @[User::RowsLoaded] + ";"</DTS:PropertyExpression>
+      <DTS:ObjectData>
+        <SQLTask:SqlTaskData
+          SQLTask:Connection="{61C2072A-BF3E-405F-BC3C-8DBD62946430}"
+          SQLTask:SqlStatementSource="EXEC etl.usp_EndRun @RunID = 0, @Status = 'Success', @RowsLoaded = 0;" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask" />
+      </DTS:ObjectData>
+    </DTS:Executable>
+    <DTS:Executable
+      DTS:refId="Package\SQL Load DimGeography"
+      DTS:CreationName="Microsoft.ExecuteSQLTask"
+      DTS:Description="Calls dbo.usp_LoadDimGeography and stores the number of provinces loaded"
+      DTS:DTSID="{952D0690-B099-4310-8676-F560D112C4A1}"
+      DTS:ExecutableType="Microsoft.ExecuteSQLTask"
+      DTS:LocaleID="-1"
+      DTS:ObjectName="SQL Load DimGeography"
+      DTS:ThreadHint="0">
+      <DTS:Variables />
+      <DTS:ObjectData>
+        <SQLTask:SqlTaskData
+          SQLTask:Connection="{61C2072A-BF3E-405F-BC3C-8DBD62946430}"
+          SQLTask:SqlStatementSource="EXEC dbo.usp_LoadDimGeography;"
+          SQLTask:ResultType="ResultSetType_SingleRow" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask">
+          <SQLTask:ResultBinding
+            SQLTask:ResultName="RowsLoaded"
+            SQLTask:DtsVariableName="User::RowsLoaded" />
+        </SQLTask:SqlTaskData>
+      </DTS:ObjectData>
+    </DTS:Executable>
+    <DTS:Executable
+      DTS:refId="Package\SQL Load Staging HCP"
+      DTS:CreationName="Microsoft.ExecuteSQLTask"
+      DTS:Description="Empties stg.HcpPopulation and BULK INSERTs the CSV"
+      DTS:DTSID="{2DA573FB-A48C-4834-9DEC-7FCC75B688D4}"
+      DTS:ExecutableType="Microsoft.ExecuteSQLTask"
+      DTS:LocaleID="-1"
+      DTS:ObjectName="SQL Load Staging HCP"
+      DTS:ThreadHint="0">
+      <DTS:Variables />
+      <DTS:PropertyExpression
+        DTS:Name="SqlStatementSource">"SET NOCOUNT ON; TRUNCATE TABLE stg.HcpPopulation; BULK INSERT stg.HcpPopulation FROM '" + @[User::ProjectRoot] + "\\clean\\hcp_population_2024.csv' WITH (FIRSTROW = 2, FIELDTERMINATOR = ';', ROWTERMINATOR = '0x0a', CODEPAGE = '65001'); SELECT COUNT(*) AS RowsLoaded FROM stg.HcpPopulation;"</DTS:PropertyExpression>
+      <DTS:ObjectData>
+        <SQLTask:SqlTaskData
+          SQLTask:Connection="{1FFDE9F5-6009-474B-BEAA-9D7B410464AA}"
+          SQLTask:SqlStatementSource="SET NOCOUNT ON; TRUNCATE TABLE stg.HcpPopulation; BULK INSERT stg.HcpPopulation FROM 'D:\DroughtProject\clean\hcp_population_2024.csv' WITH (FIRSTROW = 2, FIELDTERMINATOR = ';', ROWTERMINATOR = '0x0a', CODEPAGE = '65001'); SELECT COUNT(*) AS RowsLoaded FROM stg.HcpPopulation;"
+          SQLTask:ResultType="ResultSetType_SingleRow" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask">
+          <SQLTask:ResultBinding
+            SQLTask:ResultName="RowsLoaded"
+            SQLTask:DtsVariableName="User::RowsLoaded" />
+        </SQLTask:SqlTaskData>
+      </DTS:ObjectData>
+    </DTS:Executable>
+    <DTS:Executable
+      DTS:refId="Package\SQL Start Run"
+      DTS:CreationName="Microsoft.ExecuteSQLTask"
+      DTS:Description="Calls etl.usp_StartRun and stores the RunID"
+      DTS:DTSID="{FBD55A4D-45B2-4317-942B-9D5FF0192E65}"
+      DTS:ExecutableType="Microsoft.ExecuteSQLTask"
+      DTS:LocaleID="-1"
+      DTS:ObjectName="SQL Start Run"
+      DTS:ThreadHint="0">
+      <DTS:Variables />
+      <DTS:PropertyExpression
+        DTS:Name="SqlStatementSource">"DECLARE @id INT; EXEC etl.usp_StartRun @PackageName = N'" + @[System::PackageName] + "', @RunID = @id OUTPUT; SELECT @id AS RunID;"</DTS:PropertyExpression>
+      <DTS:ObjectData>
+        <SQLTask:SqlTaskData
+          SQLTask:Connection="{61C2072A-BF3E-405F-BC3C-8DBD62946430}"
+          SQLTask:SqlStatementSource="DECLARE @id INT; EXEC etl.usp_StartRun @PackageName = N'02_Geography', @RunID = @id OUTPUT; SELECT @id AS RunID;"
+          SQLTask:ResultType="ResultSetType_SingleRow" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask">
+          <SQLTask:ResultBinding
+            SQLTask:ResultName="RunID"
+            SQLTask:DtsVariableName="User::RunID" />
+        </SQLTask:SqlTaskData>
+      </DTS:ObjectData>
+    </DTS:Executable>
+  </DTS:Executables>
+  <DTS:PrecedenceConstraints>
+    <DTS:PrecedenceConstraint
+      DTS:refId="Package.PrecedenceConstraints[C1]"
+      DTS:CreationName=""
+      DTS:DTSID="{AAE41AA8-7F0E-4799-A62C-09C702C3DA78}"
+      DTS:From="Package\SQL Start Run"
+      DTS:LogicalAnd="True"
+      DTS:ObjectName="C1"
+      DTS:To="Package\EPT Read HCP Census" />
+    <DTS:PrecedenceConstraint
+      DTS:refId="Package.PrecedenceConstraints[C2]"
+      DTS:CreationName=""
+      DTS:DTSID="{B9AA70C7-BC25-4FA5-8126-97854D60D711}"
+      DTS:From="Package\EPT Read HCP Census"
+      DTS:LogicalAnd="True"
+      DTS:ObjectName="C2"
+      DTS:To="Package\SQL Load Staging HCP" />
+    <DTS:PrecedenceConstraint
+      DTS:refId="Package.PrecedenceConstraints[C3]"
+      DTS:CreationName=""
+      DTS:DTSID="{FB09635A-20BB-4896-BAD4-FA90A1A32D6F}"
+      DTS:From="Package\SQL Load Staging HCP"
+      DTS:LogicalAnd="True"
+      DTS:ObjectName="C3"
+      DTS:To="Package\SQL Load DimGeography" />
+    <DTS:PrecedenceConstraint
+      DTS:refId="Package.PrecedenceConstraints[C4]"
+      DTS:CreationName=""
+      DTS:DTSID="{C399EB97-2781-419C-9470-3A5A0D6098A2}"
+      DTS:From="Package\SQL Load DimGeography"
+      DTS:LogicalAnd="True"
+      DTS:ObjectName="C4"
+      DTS:To="Package\SQL End Run Success" />
+  </DTS:PrecedenceConstraints>
+  <DTS:EventHandlers>
+    <DTS:EventHandler
+      DTS:refId="Package.EventHandlers[OnError]"
+      DTS:CreationName="OnError"
+      DTS:DTSID="{00CC6D1E-1BF0-4872-8B05-C70B4ACCE9FC}"
+      DTS:EventID="0"
+      DTS:EventName="OnError"
+      DTS:LocaleID="-1">
+      <DTS:Variables>
+        <DTS:Variable
+          DTS:CreationName=""
+          DTS:Description="Propriété de propagation de l'événement"
+          DTS:DTSID="{16064AB9-DB02-4DB9-9A9A-30D3A5983454}"
+          DTS:IncludeInDebugDump="6789"
+          DTS:Namespace="System"
+          DTS:ObjectName="Propagate">
+          <DTS:VariableValue
+            DTS:DataType="11">-1</DTS:VariableValue>
+        </DTS:Variable>
+      </DTS:Variables>
+      <DTS:Executables>
+        <DTS:Executable
+          DTS:refId="Package.EventHandlers[OnError]\SQL End Run Failed"
+          DTS:CreationName="Microsoft.ExecuteSQLTask"
+          DTS:Description="Calls etl.usp_EndRun with Failed and the error text"
+          DTS:DTSID="{A659F4A1-4CAC-4F26-9C36-BEEB676B68A6}"
+          DTS:ExecutableType="Microsoft.ExecuteSQLTask"
+          DTS:LocaleID="-1"
+          DTS:ObjectName="SQL End Run Failed">
+          <DTS:Variables />
+          <DTS:PropertyExpression
+            DTS:Name="SqlStatementSource">"EXEC etl.usp_EndRun @RunID = " + (DT_WSTR, 12) @[User::RunID] + ", @Status = 'Failed', @RowsLoaded = 0, @ErrorMessage = N'" + SUBSTRING(REPLACE(@[System::ErrorDescription], "'", "''"), 1, 3500) + "';"</DTS:PropertyExpression>
+          <DTS:ObjectData>
+            <SQLTask:SqlTaskData
+              SQLTask:Connection="{61C2072A-BF3E-405F-BC3C-8DBD62946430}"
+              SQLTask:SqlStatementSource="EXEC etl.usp_EndRun @RunID = 0, @Status = 'Failed', @RowsLoaded = 0, @ErrorMessage = N'';" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask" />
+          </DTS:ObjectData>
+        </DTS:Executable>
+      </DTS:Executables>
+    </DTS:EventHandler>
+  </DTS:EventHandlers>
+</DTS:Executable>

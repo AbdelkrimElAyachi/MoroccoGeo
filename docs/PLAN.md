@@ -14,20 +14,24 @@ Status: ✅ done · 🟡 in progress · ⏳ not started
 
 | Step | What | Checks | Status |
 |---|---|---|---|
-| 3 | Province boundaries (geoBoundaries) | 75 features; complete map; second run doesn't re-download | ⏳ |
-| 4 | HCP census + `DimGeography` | 75/75 matched; SUM(Pop2024) = 36,828,330; 12 regions | ⏳ |
-| 5 | `DimDate` 1940-2030 | no gaps/duplicates; 2024-03-15 -> season 2023-24; Ramadan 2024 flagged | ⏳ |
+| 3 | Province boundaries (geoBoundaries) | 75 features; complete map; second run doesn't re-download | ✅ |
+| 4 | HCP census + `DimGeography` | 75/75 matched; SUM(Pop2024) = 36,828,330; 12 regions | ✅ |
+| 5 | `DimDate` 1940-2030 | no gaps/duplicates; 2024-03-15 -> season 2023-24; Ramadan 2024 flagged | ✅ |
+
+Phase 1 tests: `sql/tests/phase1_tests.sql` (20 checks). Run all: `ssis/tests/run_phase1.ps1`.
 
 ## Phase 2: Bringing in the data
 
 | Step | What | Checks | Status |
 |---|---|---|---|
 | 6 | FAOSTAT crops | wheat 2024 = 2,441,670 t; 2021 = 7,543,848 t; years 1961-2024; no duplicates | ⏳ |
-| 7 | Open-Meteo weather | 8,760 rows per province-year (8,784 leap); realistic values; no duplicates on re-run | ⏳ |
-| 8 | CHIRPS rainfall | 550 monthly files (1981-01 to 2026-10); 41,250 rows; wet north / dry south; July ~ 0 | ⏳ |
-| 9 | Normals + SPI | SPI mean ~ 0, std ~ 1 over 1991-2020; 1995, 2022, 2024 dry; 2009-10 wet | ⏳ |
-| 10 | MODIS NDVI | values -0.2..1; spring peak; spring 2021 greener than 2024 | ⏳ |
-| 11 | Dam water surface + official rates | Al Massira shrinks 2018-2024; no jump 2021->2022; correlation with official rates | ⏳ |
+| 7 | Open-Meteo weather, daily 1991-2026 | 365/366 rows per province-year; realistic values; no duplicates on re-run | ⏳ |
+| 8 | CHIRPS rainfall, monthly 1991-2026 | 430 monthly files (1991-01 to 2026-10); 75 x 430 = 32,250 rows; wet north / dry south; July ~ 0 | ⏳ |
+| 9 | Normals (1991-2020) + SPI | SPI mean ~ 0, std ~ 1 over 1991-2020; 1995, 2022, 2024 dry; 2009-10 wet | ⏳ |
+| 10 | MODIS NDVI, monthly 2000-2026 (Earth Engine) | values -0.2..1; spring peak; spring 2021 greener than 2024 | ⏳ |
+| 11 | Dam water surface 2017-2026 (Sentinel-2, Earth Engine) + official rates | Al Massira shrinks 2018-2024; correlation with official rates | ⏳ |
+
+Periods and size rules: see the 2026-11-18 decision in [JOURNAL.md](JOURNAL.md).
 
 Safety point: after Step 9 the project is already complete and presentable.
 

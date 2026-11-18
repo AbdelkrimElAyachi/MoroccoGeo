@@ -14,6 +14,17 @@ All sources are real and open. "Verified" = tested by download or API call on 20
 | 6 | FAOSTAT (QCL) | Crop area, production, yield | Zipped CSV | 1961 - 2024 | Free | ✅ 454 Morocco series |
 | 7 | HCP census 2024 (and 2014) | Population by region / province / commune | Excel | 2014, 2024 | Free | ✅ (search) |
 
+## Periods used in the project
+
+| Source | Period kept | Detail |
+|---|---|---|
+| CHIRPS | 1991-2026 | monthly (30-year SPI reference 1991-2020) |
+| Open-Meteo | 1991-2026 | daily: Tmax, Tmin, rain, ET0 |
+| MODIS NDVI | 2000-2026 | monthly mean per province (Earth Engine) |
+| Dams | 2017-2026 | monthly, Sentinel-2 (Earth Engine); JRC not used |
+| FAOSTAT | 2000-2024 | yearly |
+| HCP census | 2024 | |
+
 ## Links
 
 - geoBoundaries: `https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/MAR/ADM2/geoBoundaries-MAR-ADM2.geojson`
@@ -22,7 +33,8 @@ All sources are real and open. "Verified" = tested by download or API call on 20
 - Open-Meteo: `https://archive-api.open-meteo.com/v1/archive?latitude=..&longitude=..&start_date=..&end_date=..&hourly=temperature_2m,precipitation,et0_fao_evapotranspiration&format=csv`
 - FAOSTAT: `https://bulks-faostat.fao.org/production/Production_Crops_Livestock_E_Africa.zip`
 - MODIS: AppEEARS (appeears.earthdatacloud.nasa.gov), product MOD13Q1.061
-- HCP: hcp.ma, page "Population légale ... RGPH 2024" (Excel download)
+- HCP: `https://www.hcp.ma/file/242341/` ("Population légale du Royaume du Maroc selon les
+  résultats du RGPH 2024, format EXCEL", 166 KB), saved as `raw/hcp/hcp_population_legale_2024.xlsx`
 
 ## Reference values for tests
 
