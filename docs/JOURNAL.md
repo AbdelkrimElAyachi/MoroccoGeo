@@ -320,3 +320,23 @@ Fix after the commit: the user ran `phase3_tests.sql` after the incremental demo
 "Latest load per table: rows inserted + updated = 75 → FAIL". The data was correct; the test assumed the
 latest load was a no-change re-run, but the demo's last load had added October 2026 on purpose. The demo
 now ends with one more load (receipt 0 inserted / 0 updated), so both files pass in any order.
+
+---
+
+## 2026-11-19: Phase 4, Step 13, SSAS Tabular model
+
+- `sql/11_bi_views.sql`: `bi` schema with 11 views (dimensions + facts, `DimDate` limited to 1990-2030) so the
+  model reads stable views, not raw tables. SSAS service account `NT Service\MSSQLServerOLAPService` given a
+  read-only login (`db_datareader` on `DWH_DB`).
+- Model written as code: `scripts/tools/build_model.py` -> `ssas/Model.bim` (compatibility 1700, culture fr-FR):
+  11 tables, 15 relationships, 32 measures in display folders, 3 hierarchies, Date marked as date table,
+  month names sorted by month number, latitude/longitude categories for maps.
+- `ssas/deploy_model.ps1`: deploys with TMSL `createOrReplace` and processes (`refresh full`) through the
+  Analysis Services .NET library shipped with SSMS 22. Small issue: the server's database list must be reloaded
+  after a deploy before reading it back.
+- Design choice: drought and reservoir measures use the **last month of the selected period**
+  ("where are we now?"), rain sums over the period and averages over provinces.
+- `ssas/tests/reconcile_model.ps1`: 13 checks model vs SQL, **all PASS** (row counts, population 36,828,330,
+  wheat 2024, 61 provinces / 33,089,522 people in drought in Aug 2022, Settat 57.9 % of normal rain in 2024,
+  Al Massira 14.6 % in Apr 2024, Settat NDVI 0.686 in Mar 2021).
+- Documentation: `docs/MODEL.md`. Weather measures exist but show nothing until the weather is loaded.

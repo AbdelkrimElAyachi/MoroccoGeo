@@ -1,0 +1,1183 @@
+{
+  "name": "DroughtModel",
+  "compatibilityLevel": 1700,
+  "model": {
+    "culture": "fr-FR",
+    "description": "Morocco Drought & Water Security Observatory - analytical model (DWH_DB bi views).",
+    "dataSources": [
+      {
+        "name": "DWH_DB",
+        "connectionString": "Provider=MSOLEDBSQL;Data Source=localhost;Initial Catalog=DWH_DB;Integrated Security=SSPI;Persist Security Info=False",
+        "impersonationMode": "impersonateServiceAccount"
+      }
+    ],
+    "tables": [
+      {
+        "name": "Date",
+        "columns": [
+          {
+            "name": "DateKey",
+            "dataType": "int64",
+            "sourceColumn": "DateKey",
+            "summarizeBy": "none",
+            "isHidden": true
+          },
+          {
+            "name": "Date",
+            "dataType": "dateTime",
+            "sourceColumn": "Date",
+            "summarizeBy": "none",
+            "formatString": "dd/mm/yyyy",
+            "isKey": true
+          },
+          {
+            "name": "Year",
+            "dataType": "int64",
+            "sourceColumn": "Year",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "Quarter",
+            "dataType": "int64",
+            "sourceColumn": "Quarter",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "Month",
+            "dataType": "int64",
+            "sourceColumn": "Month",
+            "summarizeBy": "none",
+            "isHidden": true
+          },
+          {
+            "name": "MonthNameFr",
+            "dataType": "string",
+            "sourceColumn": "MonthNameFr",
+            "summarizeBy": "none",
+            "sortByColumn": "Month"
+          },
+          {
+            "name": "MonthNameAr",
+            "dataType": "string",
+            "sourceColumn": "MonthNameAr",
+            "summarizeBy": "none",
+            "sortByColumn": "Month"
+          },
+          {
+            "name": "YearMonth",
+            "dataType": "string",
+            "sourceColumn": "YearMonth",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "MonthStart",
+            "dataType": "dateTime",
+            "sourceColumn": "MonthStart",
+            "summarizeBy": "none",
+            "formatString": "mmm yyyy"
+          },
+          {
+            "name": "Day",
+            "dataType": "int64",
+            "sourceColumn": "Day",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "DayNameFr",
+            "dataType": "string",
+            "sourceColumn": "DayNameFr",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "IsWeekend",
+            "dataType": "boolean",
+            "sourceColumn": "IsWeekend",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "AgriSeason",
+            "dataType": "string",
+            "sourceColumn": "AgriSeason",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "AgriSeasonStartYear",
+            "dataType": "int64",
+            "sourceColumn": "AgriSeasonStartYear",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "AgriSeasonMonthNo",
+            "dataType": "int64",
+            "sourceColumn": "AgriSeasonMonthNo",
+            "summarizeBy": "none",
+            "isHidden": true
+          },
+          {
+            "name": "IsRamadan",
+            "dataType": "boolean",
+            "sourceColumn": "IsRamadan",
+            "summarizeBy": "none"
+          }
+        ],
+        "partitions": [
+          {
+            "name": "Date",
+            "mode": "import",
+            "source": {
+              "type": "query",
+              "query": "SELECT * FROM bi.DimDate",
+              "dataSource": "DWH_DB"
+            }
+          }
+        ],
+        "hierarchies": [
+          {
+            "name": "Calendar",
+            "levels": [
+              {
+                "name": "Year",
+                "ordinal": 0,
+                "column": "Year"
+              },
+              {
+                "name": "Month",
+                "ordinal": 1,
+                "column": "MonthNameFr"
+              }
+            ]
+          },
+          {
+            "name": "Agricultural season",
+            "levels": [
+              {
+                "name": "Season",
+                "ordinal": 0,
+                "column": "AgriSeason"
+              },
+              {
+                "name": "Month",
+                "ordinal": 1,
+                "column": "MonthNameFr"
+              }
+            ]
+          }
+        ],
+        "description": "Calendar 1990-2030 with agricultural season (Sept-Aug) and Ramadan.",
+        "dataCategory": "Time"
+      },
+      {
+        "name": "Province",
+        "columns": [
+          {
+            "name": "GeographyKey",
+            "dataType": "int64",
+            "sourceColumn": "GeographyKey",
+            "summarizeBy": "none",
+            "isHidden": true
+          },
+          {
+            "name": "GeoLevel",
+            "dataType": "string",
+            "sourceColumn": "GeoLevel",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "HcpCode",
+            "dataType": "int64",
+            "sourceColumn": "HcpCode",
+            "summarizeBy": "none",
+            "isHidden": true
+          },
+          {
+            "name": "ProvinceName",
+            "dataType": "string",
+            "sourceColumn": "ProvinceName",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "ProvinceShort",
+            "dataType": "string",
+            "sourceColumn": "ProvinceShort",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "ProvinceType",
+            "dataType": "string",
+            "sourceColumn": "ProvinceType",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "RegionCode",
+            "dataType": "int64",
+            "sourceColumn": "RegionCode",
+            "summarizeBy": "none",
+            "isHidden": true
+          },
+          {
+            "name": "RegionName",
+            "dataType": "string",
+            "sourceColumn": "RegionName",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "ShapeID",
+            "dataType": "string",
+            "sourceColumn": "ShapeID",
+            "summarizeBy": "none",
+            "isHidden": true
+          },
+          {
+            "name": "AreaKm2",
+            "dataType": "double",
+            "sourceColumn": "AreaKm2",
+            "summarizeBy": "none",
+            "formatString": "#,0"
+          },
+          {
+            "name": "PointLat",
+            "dataType": "double",
+            "sourceColumn": "PointLat",
+            "summarizeBy": "none",
+            "dataCategory": "Latitude"
+          },
+          {
+            "name": "PointLon",
+            "dataType": "double",
+            "sourceColumn": "PointLon",
+            "summarizeBy": "none",
+            "dataCategory": "Longitude"
+          },
+          {
+            "name": "Pop2024",
+            "dataType": "int64",
+            "sourceColumn": "Pop2024",
+            "summarizeBy": "sum",
+            "formatString": "#,0"
+          },
+          {
+            "name": "PopUrban2024",
+            "dataType": "int64",
+            "sourceColumn": "PopUrban2024",
+            "summarizeBy": "sum",
+            "formatString": "#,0"
+          },
+          {
+            "name": "PopRural2024",
+            "dataType": "int64",
+            "sourceColumn": "PopRural2024",
+            "summarizeBy": "sum",
+            "formatString": "#,0"
+          },
+          {
+            "name": "RuralSharePct",
+            "dataType": "double",
+            "sourceColumn": "RuralSharePct",
+            "summarizeBy": "none",
+            "formatString": "#,0.0"
+          }
+        ],
+        "partitions": [
+          {
+            "name": "Province",
+            "mode": "import",
+            "source": {
+              "type": "query",
+              "query": "SELECT * FROM bi.DimGeography",
+              "dataSource": "DWH_DB"
+            }
+          }
+        ],
+        "measures": [
+          {
+            "name": "Population 2024",
+            "expression": "CALCULATE ( SUM ( Province[Pop2024] ), Province[GeoLevel] = \"Province\" )",
+            "formatString": "#,0",
+            "displayFolder": "Population",
+            "description": "Legal population 2024 (HCP census) of the provinces in the selection."
+          },
+          {
+            "name": "Provinces",
+            "expression": "CALCULATE ( COUNTROWS ( Province ), Province[GeoLevel] = \"Province\" )",
+            "formatString": "#,0",
+            "displayFolder": "Population"
+          }
+        ],
+        "hierarchies": [
+          {
+            "name": "Region - Province",
+            "levels": [
+              {
+                "name": "Region",
+                "ordinal": 0,
+                "column": "RegionName"
+              },
+              {
+                "name": "Province",
+                "ordinal": 1,
+                "column": "ProvinceShort"
+              }
+            ]
+          }
+        ],
+        "description": "75 provinces and prefectures (HCP 2024) + country row (GeographyKey 0 = Maroc)."
+      },
+      {
+        "name": "Crop",
+        "columns": [
+          {
+            "name": "CropKey",
+            "dataType": "int64",
+            "sourceColumn": "CropKey",
+            "summarizeBy": "none",
+            "isHidden": true
+          },
+          {
+            "name": "FaoItemCode",
+            "dataType": "int64",
+            "sourceColumn": "FaoItemCode",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "CropNameEn",
+            "dataType": "string",
+            "sourceColumn": "CropNameEn",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "CropNameFr",
+            "dataType": "string",
+            "sourceColumn": "CropNameFr",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "CropGroup",
+            "dataType": "string",
+            "sourceColumn": "CropGroup",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "IsAggregate",
+            "dataType": "boolean",
+            "sourceColumn": "IsAggregate",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "IsKeyCrop",
+            "dataType": "boolean",
+            "sourceColumn": "IsKeyCrop",
+            "summarizeBy": "none"
+          }
+        ],
+        "partitions": [
+          {
+            "name": "Crop",
+            "mode": "import",
+            "source": {
+              "type": "query",
+              "query": "SELECT * FROM bi.DimCrop",
+              "dataSource": "DWH_DB"
+            }
+          }
+        ]
+      },
+      {
+        "name": "Dam",
+        "columns": [
+          {
+            "name": "DamKey",
+            "dataType": "int64",
+            "sourceColumn": "DamKey",
+            "summarizeBy": "none",
+            "isHidden": true
+          },
+          {
+            "name": "DamName",
+            "dataType": "string",
+            "sourceColumn": "DamName",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "GeographyKey",
+            "dataType": "int64",
+            "sourceColumn": "GeographyKey",
+            "summarizeBy": "none",
+            "isHidden": true
+          },
+          {
+            "name": "OsmAreaKm2",
+            "dataType": "double",
+            "sourceColumn": "OsmAreaKm2",
+            "summarizeBy": "none",
+            "formatString": "#,0.0"
+          },
+          {
+            "name": "MaxWaterKm2",
+            "dataType": "double",
+            "sourceColumn": "MaxWaterKm2",
+            "summarizeBy": "none",
+            "formatString": "#,0.0"
+          },
+          {
+            "name": "Lat",
+            "dataType": "double",
+            "sourceColumn": "Lat",
+            "summarizeBy": "none",
+            "dataCategory": "Latitude"
+          },
+          {
+            "name": "Lon",
+            "dataType": "double",
+            "sourceColumn": "Lon",
+            "summarizeBy": "none",
+            "dataCategory": "Longitude"
+          }
+        ],
+        "partitions": [
+          {
+            "name": "Dam",
+            "mode": "import",
+            "source": {
+              "type": "query",
+              "query": "SELECT * FROM bi.DimDam",
+              "dataSource": "DWH_DB"
+            }
+          }
+        ]
+      },
+      {
+        "name": "Drought Category",
+        "columns": [
+          {
+            "name": "DroughtCategoryKey",
+            "dataType": "int64",
+            "sourceColumn": "DroughtCategoryKey",
+            "summarizeBy": "none",
+            "isHidden": true
+          },
+          {
+            "name": "CategoryFr",
+            "dataType": "string",
+            "sourceColumn": "CategoryFr",
+            "summarizeBy": "none",
+            "sortByColumn": "DroughtCategoryKey"
+          },
+          {
+            "name": "CategoryEn",
+            "dataType": "string",
+            "sourceColumn": "CategoryEn",
+            "summarizeBy": "none",
+            "sortByColumn": "DroughtCategoryKey"
+          },
+          {
+            "name": "MinSpi",
+            "dataType": "double",
+            "sourceColumn": "MinSpi",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "MaxSpi",
+            "dataType": "double",
+            "sourceColumn": "MaxSpi",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "IsDrought",
+            "dataType": "boolean",
+            "sourceColumn": "IsDrought",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "ColorHex",
+            "dataType": "string",
+            "sourceColumn": "ColorHex",
+            "summarizeBy": "none"
+          }
+        ],
+        "partitions": [
+          {
+            "name": "Drought Category",
+            "mode": "import",
+            "source": {
+              "type": "query",
+              "query": "SELECT * FROM bi.DimDroughtCategory",
+              "dataSource": "DWH_DB"
+            }
+          }
+        ]
+      },
+      {
+        "name": "Rainfall",
+        "columns": [
+          {
+            "name": "DateKey",
+            "dataType": "int64",
+            "sourceColumn": "DateKey",
+            "summarizeBy": "none",
+            "isHidden": true
+          },
+          {
+            "name": "GeographyKey",
+            "dataType": "int64",
+            "sourceColumn": "GeographyKey",
+            "summarizeBy": "none",
+            "isHidden": true
+          },
+          {
+            "name": "RainMm",
+            "dataType": "double",
+            "sourceColumn": "RainMm",
+            "summarizeBy": "none",
+            "isHidden": true
+          },
+          {
+            "name": "NormalMm",
+            "dataType": "double",
+            "sourceColumn": "NormalMm",
+            "summarizeBy": "none",
+            "isHidden": true
+          },
+          {
+            "name": "AnomalyPct",
+            "dataType": "double",
+            "sourceColumn": "AnomalyPct",
+            "summarizeBy": "none",
+            "isHidden": true
+          }
+        ],
+        "partitions": [
+          {
+            "name": "Rainfall",
+            "mode": "import",
+            "source": {
+              "type": "query",
+              "query": "SELECT * FROM bi.FactRainfall",
+              "dataSource": "DWH_DB"
+            }
+          }
+        ],
+        "measures": [
+          {
+            "name": "Rain (mm)",
+            "expression": "AVERAGEX ( VALUES ( Province[GeographyKey] ), CALCULATE ( SUM ( Rainfall[RainMm] ) ) )",
+            "formatString": "#,0.0",
+            "displayFolder": "Rainfall",
+            "description": "Total rain over the selected period, averaged over the selected provinces (CHIRPS)."
+          },
+          {
+            "name": "Normal Rain (mm)",
+            "expression": "AVERAGEX ( VALUES ( Province[GeographyKey] ), CALCULATE ( SUM ( Rainfall[NormalMm] ) ) )",
+            "formatString": "#,0.0",
+            "displayFolder": "Rainfall",
+            "description": "Same, for the 1991-2020 normal of the same months."
+          },
+          {
+            "name": "Rain % of Normal",
+            "expression": "DIVIDE ( [Rain (mm)], [Normal Rain (mm)] )",
+            "formatString": "0.0 %",
+            "displayFolder": "Rainfall",
+            "description": "100 % = normal; below 100 % = drier than usual."
+          }
+        ]
+      },
+      {
+        "name": "Drought",
+        "columns": [
+          {
+            "name": "DateKey",
+            "dataType": "int64",
+            "sourceColumn": "DateKey",
+            "summarizeBy": "none",
+            "isHidden": true
+          },
+          {
+            "name": "GeographyKey",
+            "dataType": "int64",
+            "sourceColumn": "GeographyKey",
+            "summarizeBy": "none",
+            "isHidden": true
+          },
+          {
+            "name": "SpiScale",
+            "dataType": "int64",
+            "sourceColumn": "SpiScale",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "SpiValue",
+            "dataType": "double",
+            "sourceColumn": "SpiValue",
+            "summarizeBy": "none",
+            "isHidden": true
+          },
+          {
+            "name": "DroughtCategoryKey",
+            "dataType": "int64",
+            "sourceColumn": "DroughtCategoryKey",
+            "summarizeBy": "none",
+            "isHidden": true
+          }
+        ],
+        "partitions": [
+          {
+            "name": "Drought",
+            "mode": "import",
+            "source": {
+              "type": "query",
+              "query": "SELECT * FROM bi.FactDrought",
+              "dataSource": "DWH_DB"
+            }
+          }
+        ],
+        "measures": [
+          {
+            "name": "SPI-1",
+            "expression": "CALCULATE ( AVERAGE ( Drought[SpiValue] ), Drought[SpiScale] = 1 )",
+            "formatString": "#,0.00",
+            "displayFolder": "Drought index"
+          },
+          {
+            "name": "SPI-3",
+            "expression": "CALCULATE ( AVERAGE ( Drought[SpiValue] ), Drought[SpiScale] = 3 )",
+            "formatString": "#,0.00",
+            "displayFolder": "Drought index"
+          },
+          {
+            "name": "SPI-6",
+            "expression": "CALCULATE ( AVERAGE ( Drought[SpiValue] ), Drought[SpiScale] = 6 )",
+            "formatString": "#,0.00",
+            "displayFolder": "Drought index"
+          },
+          {
+            "name": "SPI-12",
+            "expression": "CALCULATE ( AVERAGE ( Drought[SpiValue] ), Drought[SpiScale] = 12 )",
+            "formatString": "#,0.00",
+            "displayFolder": "Drought index",
+            "description": "Average SPI-12 over the selection (0 normal, <= -1 drought)."
+          },
+          {
+            "name": "SPI-12 Latest Month",
+            "expression": "VAR d = CALCULATE ( MAX ( Drought[DateKey] ), Drought[SpiScale] = 12 ) RETURN CALCULATE ( AVERAGE ( Drought[SpiValue] ), Drought[SpiScale] = 12, REMOVEFILTERS ( 'Date' ), 'Date'[DateKey] = d )",
+            "formatString": "#,0.00",
+            "displayFolder": "Drought index",
+            "description": "SPI-12 at the last month of the selected period."
+          },
+          {
+            "name": "Provinces in Drought",
+            "expression": "COUNTROWS ( FILTER ( VALUES ( Province[GeographyKey] ), [SPI-12 Latest Month] <= -1 ) )",
+            "formatString": "#,0",
+            "displayFolder": "Drought index",
+            "description": "Provinces with SPI-12 <= -1 at the last month of the period."
+          },
+          {
+            "name": "Provinces with SPI",
+            "expression": "COUNTROWS ( FILTER ( VALUES ( Province[GeographyKey] ), NOT ISBLANK ( [SPI-12 Latest Month] ) ) )",
+            "formatString": "#,0",
+            "displayFolder": "Drought index"
+          },
+          {
+            "name": "% Provinces in Drought",
+            "expression": "DIVIDE ( [Provinces in Drought], [Provinces with SPI] )",
+            "formatString": "0.0 %",
+            "displayFolder": "Drought index"
+          },
+          {
+            "name": "People in Drought",
+            "expression": "SUMX ( FILTER ( VALUES ( Province[GeographyKey] ), [SPI-12 Latest Month] <= -1 ), CALCULATE ( SUM ( Province[Pop2024] ) ) )",
+            "formatString": "#,0",
+            "displayFolder": "Drought index",
+            "description": "2024 population of the provinces in drought (SPI-12 <= -1)."
+          },
+          {
+            "name": "% Population in Drought",
+            "expression": "DIVIDE ( [People in Drought], [Population 2024] )",
+            "formatString": "0.0 %",
+            "displayFolder": "Drought index"
+          }
+        ]
+      },
+      {
+        "name": "Vegetation",
+        "columns": [
+          {
+            "name": "DateKey",
+            "dataType": "int64",
+            "sourceColumn": "DateKey",
+            "summarizeBy": "none",
+            "isHidden": true
+          },
+          {
+            "name": "GeographyKey",
+            "dataType": "int64",
+            "sourceColumn": "GeographyKey",
+            "summarizeBy": "none",
+            "isHidden": true
+          },
+          {
+            "name": "NdviCrop",
+            "dataType": "double",
+            "sourceColumn": "NdviCrop",
+            "summarizeBy": "none",
+            "isHidden": true
+          },
+          {
+            "name": "NdviAll",
+            "dataType": "double",
+            "sourceColumn": "NdviAll",
+            "summarizeBy": "none",
+            "isHidden": true
+          },
+          {
+            "name": "CropSharePct",
+            "dataType": "double",
+            "sourceColumn": "CropSharePct",
+            "summarizeBy": "none",
+            "isHidden": true
+          },
+          {
+            "name": "NdviCropNormal",
+            "dataType": "double",
+            "sourceColumn": "NdviCropNormal",
+            "summarizeBy": "none",
+            "isHidden": true
+          },
+          {
+            "name": "NdviCropAnomaly",
+            "dataType": "double",
+            "sourceColumn": "NdviCropAnomaly",
+            "summarizeBy": "none",
+            "isHidden": true
+          },
+          {
+            "name": "NdviAllNormal",
+            "dataType": "double",
+            "sourceColumn": "NdviAllNormal",
+            "summarizeBy": "none",
+            "isHidden": true
+          },
+          {
+            "name": "NdviAllAnomaly",
+            "dataType": "double",
+            "sourceColumn": "NdviAllAnomaly",
+            "summarizeBy": "none",
+            "isHidden": true
+          }
+        ],
+        "partitions": [
+          {
+            "name": "Vegetation",
+            "mode": "import",
+            "source": {
+              "type": "query",
+              "query": "SELECT * FROM bi.FactVegetation",
+              "dataSource": "DWH_DB"
+            }
+          }
+        ],
+        "measures": [
+          {
+            "name": "NDVI Farmland",
+            "expression": "AVERAGE ( Vegetation[NdviCrop] )",
+            "formatString": "0.000",
+            "displayFolder": "Vegetation",
+            "description": "Greenness of farmland (MODIS): ~0 bare soil, 0.2-0.3 stressed, 0.5+ healthy crops."
+          },
+          {
+            "name": "NDVI Farmland Normal",
+            "expression": "AVERAGE ( Vegetation[NdviCropNormal] )",
+            "formatString": "0.000",
+            "displayFolder": "Vegetation",
+            "description": "Average of the same months over 2001-2020."
+          },
+          {
+            "name": "NDVI Farmland Anomaly",
+            "expression": "[NDVI Farmland] - [NDVI Farmland Normal]",
+            "formatString": "+0.000;-0.000;0.000",
+            "displayFolder": "Vegetation",
+            "description": "Negative = less green than usual."
+          },
+          {
+            "name": "NDVI All Land",
+            "expression": "AVERAGE ( Vegetation[NdviAll] )",
+            "formatString": "0.000",
+            "displayFolder": "Vegetation"
+          }
+        ]
+      },
+      {
+        "name": "Reservoir",
+        "columns": [
+          {
+            "name": "DateKey",
+            "dataType": "int64",
+            "sourceColumn": "DateKey",
+            "summarizeBy": "none",
+            "isHidden": true
+          },
+          {
+            "name": "DamKey",
+            "dataType": "int64",
+            "sourceColumn": "DamKey",
+            "summarizeBy": "none",
+            "isHidden": true
+          },
+          {
+            "name": "WaterKm2",
+            "dataType": "double",
+            "sourceColumn": "WaterKm2",
+            "summarizeBy": "none",
+            "isHidden": true
+          },
+          {
+            "name": "ClearPct",
+            "dataType": "double",
+            "sourceColumn": "ClearPct",
+            "summarizeBy": "none",
+            "isHidden": true
+          },
+          {
+            "name": "IsReliable",
+            "dataType": "boolean",
+            "sourceColumn": "IsReliable",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "FillIndexPct",
+            "dataType": "double",
+            "sourceColumn": "FillIndexPct",
+            "summarizeBy": "none",
+            "isHidden": true
+          }
+        ],
+        "partitions": [
+          {
+            "name": "Reservoir",
+            "mode": "import",
+            "source": {
+              "type": "query",
+              "query": "SELECT * FROM bi.FactReservoir",
+              "dataSource": "DWH_DB"
+            }
+          }
+        ],
+        "measures": [
+          {
+            "name": "Water Surface (km2)",
+            "expression": "VAR d = CALCULATE ( MAX ( Reservoir[DateKey] ) ) RETURN CALCULATE ( SUM ( Reservoir[WaterKm2] ), REMOVEFILTERS ( 'Date' ), 'Date'[DateKey] = d )",
+            "formatString": "#,0.0",
+            "displayFolder": "Reservoirs",
+            "description": "Water surface of the selected dams at the last month of the period (Sentinel-2)."
+          },
+          {
+            "name": "Max Water Surface (km2)",
+            "expression": "SUM ( Dam[MaxWaterKm2] )",
+            "formatString": "#,0.0",
+            "displayFolder": "Reservoirs"
+          },
+          {
+            "name": "Fill Index",
+            "expression": "DIVIDE ( [Water Surface (km2)], [Max Water Surface (km2)] )",
+            "formatString": "0.0 %",
+            "displayFolder": "Reservoirs",
+            "description": "Water surface / largest surface observed (surface, not volume)."
+          }
+        ]
+      },
+      {
+        "name": "Crop Production",
+        "columns": [
+          {
+            "name": "DateKey",
+            "dataType": "int64",
+            "sourceColumn": "DateKey",
+            "summarizeBy": "none",
+            "isHidden": true
+          },
+          {
+            "name": "GeographyKey",
+            "dataType": "int64",
+            "sourceColumn": "GeographyKey",
+            "summarizeBy": "none",
+            "isHidden": true
+          },
+          {
+            "name": "CropKey",
+            "dataType": "int64",
+            "sourceColumn": "CropKey",
+            "summarizeBy": "none",
+            "isHidden": true
+          },
+          {
+            "name": "Year",
+            "dataType": "int64",
+            "sourceColumn": "Year",
+            "summarizeBy": "none",
+            "isHidden": true
+          },
+          {
+            "name": "AreaHa",
+            "dataType": "double",
+            "sourceColumn": "AreaHa",
+            "summarizeBy": "none",
+            "isHidden": true
+          },
+          {
+            "name": "YieldKgHa",
+            "dataType": "double",
+            "sourceColumn": "YieldKgHa",
+            "summarizeBy": "none",
+            "isHidden": true
+          },
+          {
+            "name": "ProductionT",
+            "dataType": "double",
+            "sourceColumn": "ProductionT",
+            "summarizeBy": "none",
+            "isHidden": true
+          }
+        ],
+        "partitions": [
+          {
+            "name": "Crop Production",
+            "mode": "import",
+            "source": {
+              "type": "query",
+              "query": "SELECT * FROM bi.FactCropProduction",
+              "dataSource": "DWH_DB"
+            }
+          }
+        ],
+        "measures": [
+          {
+            "name": "Production (t)",
+            "expression": "SUM ( 'Crop Production'[ProductionT] )",
+            "formatString": "#,0",
+            "displayFolder": "Crops"
+          },
+          {
+            "name": "Area Harvested (ha)",
+            "expression": "SUM ( 'Crop Production'[AreaHa] )",
+            "formatString": "#,0",
+            "displayFolder": "Crops"
+          },
+          {
+            "name": "Yield (kg/ha)",
+            "expression": "DIVIDE ( [Production (t)] * 1000, [Area Harvested (ha)] )",
+            "formatString": "#,0",
+            "displayFolder": "Crops"
+          },
+          {
+            "name": "Wheat Production (t)",
+            "expression": "CALCULATE ( [Production (t)], Crop[FaoItemCode] = 15 )",
+            "formatString": "#,0",
+            "displayFolder": "Crops"
+          },
+          {
+            "name": "Wheat Yield (kg/ha)",
+            "expression": "CALCULATE ( [Yield (kg/ha)], Crop[FaoItemCode] = 15 )",
+            "formatString": "#,0",
+            "displayFolder": "Crops"
+          },
+          {
+            "name": "Production vs Previous Year",
+            "expression": "VAR y = MAX ( 'Crop Production'[Year] ) VAR cur = [Production (t)] VAR prev = CALCULATE ( [Production (t)], REMOVEFILTERS ( 'Date' ), 'Date'[Year] = y - 1 ) RETURN DIVIDE ( cur - prev, prev )",
+            "formatString": "0.0 %",
+            "displayFolder": "Crops"
+          }
+        ]
+      },
+      {
+        "name": "Weather",
+        "columns": [
+          {
+            "name": "DateKey",
+            "dataType": "int64",
+            "sourceColumn": "DateKey",
+            "summarizeBy": "none",
+            "isHidden": true
+          },
+          {
+            "name": "GeographyKey",
+            "dataType": "int64",
+            "sourceColumn": "GeographyKey",
+            "summarizeBy": "none",
+            "isHidden": true
+          },
+          {
+            "name": "TmaxC",
+            "dataType": "double",
+            "sourceColumn": "TmaxC",
+            "summarizeBy": "none",
+            "isHidden": true
+          },
+          {
+            "name": "TminC",
+            "dataType": "double",
+            "sourceColumn": "TminC",
+            "summarizeBy": "none",
+            "isHidden": true
+          },
+          {
+            "name": "PrecipMm",
+            "dataType": "double",
+            "sourceColumn": "PrecipMm",
+            "summarizeBy": "none",
+            "isHidden": true
+          },
+          {
+            "name": "Et0Mm",
+            "dataType": "double",
+            "sourceColumn": "Et0Mm",
+            "summarizeBy": "none",
+            "isHidden": true
+          }
+        ],
+        "partitions": [
+          {
+            "name": "Weather",
+            "mode": "import",
+            "source": {
+              "type": "query",
+              "query": "SELECT * FROM bi.FactWeather",
+              "dataSource": "DWH_DB"
+            }
+          }
+        ],
+        "measures": [
+          {
+            "name": "Avg Max Temperature (C)",
+            "expression": "AVERAGE ( Weather[TmaxC] )",
+            "formatString": "#,0.0",
+            "displayFolder": "Weather"
+          },
+          {
+            "name": "Avg Min Temperature (C)",
+            "expression": "AVERAGE ( Weather[TminC] )",
+            "formatString": "#,0.0",
+            "displayFolder": "Weather"
+          },
+          {
+            "name": "Evapotranspiration (mm)",
+            "expression": "AVERAGEX ( VALUES ( Province[GeographyKey] ), CALCULATE ( SUM ( Weather[Et0Mm] ) ) )",
+            "formatString": "#,0.0",
+            "displayFolder": "Weather",
+            "description": "Water demand of the air (FAO-56 ET0) over the period, averaged over provinces."
+          },
+          {
+            "name": "Hot Days (Tmax >= 35C) per Province",
+            "expression": "DIVIDE ( CALCULATE ( COUNTROWS ( Weather ), Weather[TmaxC] >= 35 ), DISTINCTCOUNT ( Weather[GeographyKey] ) )",
+            "formatString": "#,0.0",
+            "displayFolder": "Weather"
+          }
+        ]
+      }
+    ],
+    "relationships": [
+      {
+        "name": "Rainfall_DateKey_Date",
+        "fromTable": "Rainfall",
+        "fromColumn": "DateKey",
+        "toTable": "Date",
+        "toColumn": "DateKey"
+      },
+      {
+        "name": "Rainfall_GeographyKey_Province",
+        "fromTable": "Rainfall",
+        "fromColumn": "GeographyKey",
+        "toTable": "Province",
+        "toColumn": "GeographyKey"
+      },
+      {
+        "name": "Drought_DateKey_Date",
+        "fromTable": "Drought",
+        "fromColumn": "DateKey",
+        "toTable": "Date",
+        "toColumn": "DateKey"
+      },
+      {
+        "name": "Drought_GeographyKey_Province",
+        "fromTable": "Drought",
+        "fromColumn": "GeographyKey",
+        "toTable": "Province",
+        "toColumn": "GeographyKey"
+      },
+      {
+        "name": "Drought_DroughtCategoryKey_Drought Category",
+        "fromTable": "Drought",
+        "fromColumn": "DroughtCategoryKey",
+        "toTable": "Drought Category",
+        "toColumn": "DroughtCategoryKey"
+      },
+      {
+        "name": "Vegetation_DateKey_Date",
+        "fromTable": "Vegetation",
+        "fromColumn": "DateKey",
+        "toTable": "Date",
+        "toColumn": "DateKey"
+      },
+      {
+        "name": "Vegetation_GeographyKey_Province",
+        "fromTable": "Vegetation",
+        "fromColumn": "GeographyKey",
+        "toTable": "Province",
+        "toColumn": "GeographyKey"
+      },
+      {
+        "name": "Reservoir_DateKey_Date",
+        "fromTable": "Reservoir",
+        "fromColumn": "DateKey",
+        "toTable": "Date",
+        "toColumn": "DateKey"
+      },
+      {
+        "name": "Reservoir_DamKey_Dam",
+        "fromTable": "Reservoir",
+        "fromColumn": "DamKey",
+        "toTable": "Dam",
+        "toColumn": "DamKey"
+      },
+      {
+        "name": "Dam_GeographyKey_Province",
+        "fromTable": "Dam",
+        "fromColumn": "GeographyKey",
+        "toTable": "Province",
+        "toColumn": "GeographyKey"
+      },
+      {
+        "name": "Crop Production_DateKey_Date",
+        "fromTable": "Crop Production",
+        "fromColumn": "DateKey",
+        "toTable": "Date",
+        "toColumn": "DateKey"
+      },
+      {
+        "name": "Crop Production_GeographyKey_Province",
+        "fromTable": "Crop Production",
+        "fromColumn": "GeographyKey",
+        "toTable": "Province",
+        "toColumn": "GeographyKey"
+      },
+      {
+        "name": "Crop Production_CropKey_Crop",
+        "fromTable": "Crop Production",
+        "fromColumn": "CropKey",
+        "toTable": "Crop",
+        "toColumn": "CropKey"
+      },
+      {
+        "name": "Weather_DateKey_Date",
+        "fromTable": "Weather",
+        "fromColumn": "DateKey",
+        "toTable": "Date",
+        "toColumn": "DateKey"
+      },
+      {
+        "name": "Weather_GeographyKey_Province",
+        "fromTable": "Weather",
+        "fromColumn": "GeographyKey",
+        "toTable": "Province",
+        "toColumn": "GeographyKey"
+      }
+    ]
+  }
+}

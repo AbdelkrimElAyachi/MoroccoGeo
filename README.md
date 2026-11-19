@@ -45,3 +45,4 @@ Sources (CHIRPS, Open-Meteo, MODIS, JRC/Sentinel-2, FAOSTAT, HCP, geoBoundaries)
 - [Data sources](docs/DATA_SOURCES.md): verified sources, links and known limits
 - [Challenges](docs/CHALLENGES.md): problems met and how they were solved (for the presentation)
 - [Warehouse](docs/WAREHOUSE.md): star schema diagram, design decisions and data dictionary
+- [Model](docs/MODEL.md): SSAS Tabular model, measures and reconciliation with SQL

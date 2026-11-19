@@ -48,7 +48,7 @@ Phase 3 tests: `sql/tests/phase3_tests.sql` (12 checks), `ssis/tests/run_rerun_c
 
 | Step | What | Checks | Status |
 |---|---|---|---|
-| 13 | SSAS Tabular model + DAX | measures match SQL queries; wheat 2024 = 2,441,670 t; Excel connects | ⏳ |
+| 13 | SSAS Tabular model + DAX | measures match SQL queries; wheat 2024 = 2,441,670 t; Excel connects | ✅ (13 reconciliation checks; Excel: to try) |
 | 14 | Power BI, 6 pages | each page answers its user's question; 75 provinces on map; filters work | ⏳ |
 | 15 | Yield forecast | leave-one-year-out error reported; 2024 predicted as bad year | ⏳ |
 | 16 | Monthly PDF bulletin (Power BI Report Server) + alerts | correct figures for 3 months; alert fires in test | ⏳ |
