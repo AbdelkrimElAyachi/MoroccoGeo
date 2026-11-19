@@ -315,3 +315,8 @@ Only Open-Meteo is costly (new variable = ~3 days of re-download); extra weather
 moisture) would come from ERA5-Land in Earth Engine instead. Decision: keep 4 weather variables.
 
 **Phase 3 complete** (weather will be added to the checks when loaded).
+
+Fix after the commit: the user ran `phase3_tests.sql` after the incremental demo and got
+"Latest load per table: rows inserted + updated = 75 → FAIL". The data was correct; the test assumed the
+latest load was a no-change re-run, but the demo's last load had added October 2026 on purpose. The demo
+now ends with one more load (receipt 0 inserted / 0 updated), so both files pass in any order.

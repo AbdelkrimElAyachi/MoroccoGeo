@@ -53,7 +53,9 @@ INSERT @t SELECT N'SPI value outside its category range', N'0',
 INSERT @t SELECT N'Columnstore indexes on large facts', N'4',
     CAST((SELECT COUNT(*) FROM sys.indexes WHERE type_desc = 'NONCLUSTERED COLUMNSTORE') AS NVARCHAR(60));
 
--- 5. Safe re-runs: the latest load of each table changed nothing (after run_rerun_check.ps1)
+-- 5. Safe re-runs: the latest load of each table changed nothing.
+--    Valid after run_rerun_check.ps1 or phase3_incremental_demo.sql (both end with a no-change load).
+--    If you loaded genuinely new data since, this shows the rows added: run the load once more first.
 INSERT @t SELECT N'Latest load per table: rows inserted + updated', N'0',
     CAST((SELECT ISNULL(SUM(RowsInserted + RowsUpdated), -1) FROM (
           SELECT TableName, RowsInserted, RowsUpdated,

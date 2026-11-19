@@ -16,3 +16,11 @@ EXEC dbo.usp_LoadRainfall;
 SELECT TOP 1 TableName, SourceRows, RowsInserted, RowsUpdated, RowsUnchanged,
        CASE WHEN RowsInserted = 75 AND RowsUpdated = 0 THEN 'PASS: only the new month was added' ELSE 'FAIL' END AS Result
 FROM etl.LoadAudit WHERE TableName = N'dbo.FactRainfallMonthly' ORDER BY AuditID DESC;
+
+-- Run the same load again: nothing left to add, so the receipt must say 0 inserted, 0 updated.
+-- (This also leaves "latest load = no change", which phase3_tests.sql checks.)
+EXEC dbo.usp_LoadRainfall;
+
+SELECT TOP 1 TableName, SourceRows, RowsInserted, RowsUpdated, RowsUnchanged,
+       CASE WHEN RowsInserted = 0 AND RowsUpdated = 0 THEN 'PASS: re-run after the new month changed nothing' ELSE 'FAIL' END AS Result
+FROM etl.LoadAudit WHERE TableName = N'dbo.FactRainfallMonthly' ORDER BY AuditID DESC;
