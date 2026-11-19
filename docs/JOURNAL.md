@@ -191,3 +191,127 @@ keep the coarsest time detail that answers the question; reduce to the 75 provin
 delete big originals after processing but keep a manifest (file, URL, date, size).
 Expected: warehouse ~1.1 million rows, ~1-2 GB kept on disk in total.
 `DimDate` stays 1940-2030 (33k rows, harmless).
+
+---
+
+## 2026-11-18: Phase 2, Steps 6, 8, 9 (crops, rainfall, SPI)
+
+**Package generator** (`scripts/tools/make_package.py`, `build_packages.py`): writes each SSIS
+package in the standard pattern with fresh IDs (Start Run -> Python -> BULK INSERT staging ->
+load procedure -> End Run; OnError -> Failed). First bug: task names can't contain "." (fixed).
+New packages are written to `ssis/_incoming/` and then added to the Visual Studio project.
+
+**Step 6, crops** (`04_faostat.py`, `sql/07_crops.sql`, package `03_Crops`): Morocco 2000-2024,
+area / yield / production unpivoted from "one column per year". `DimCrop` (103 crops, French names
+and groups for the main ones, 10 key crops), `FactCropProduction` (2,546 rows, national, key 0).
+Yearly facts use DateKey = 1 January of the harvest year, so harvest 2024 -> season 2023-24.
+
+**Step 8, rainfall** (`05_chirps.py`, `sql/08_rainfall_drought_weather.sql`, package `04_Rainfall`):
+430 months (1991-01 to 2026-10). Each Africa file (4.9 MB) cropped to Morocco (~0.2 MB) and deleted;
+`raw/chirps/manifest.csv` lists every download. Crops kept: 83 MB. Province value = average of the
+~5 km pixels whose centre is inside the province (Settat 263 pixels, Rabat 5).
+`FactRainfallMonthly` 32,250 rows with the 1991-2020 normal and % of normal (computed in SQL).
+Problems: the download froze 20+ minutes (no timeout) -> timeout + retries; the server answered
+"429 Too Many Requests" several times -> handled by the retries. Full run ~37 min.
+
+**Step 9, SPI** (`06_spi.py`, package `05_Drought`): SPI-1/3/6/12, gamma fitted on 1991-2020 per
+province and calendar month, zero-rain months handled (WMO method). 127,578 values. Province-months
+with fewer than 10 non-zero calibration values (desert summers) are left out (72 for SPI-1).
+Check: SPI-12 over 1991-2020 mean -0.000, standard deviation 1.001.
+`DimDroughtCategory` (7 classes, McKee 1993), `FactDroughtIndex`.
+
+**Tests:** `sql/tests/phase2_tests.sql`, 19 checks PASS (weather skipped until loaded).
+
+**First results (SPI-12 at the end of August, 2000-2026):**
+worst seasons 2021-22 (national SPI -1.19, 61 of 75 provinces in drought, 33.1 M people at 2024
+population), 2019-20 (-1.28, 48 provinces), 2023-24 (-1.15), 2024-25 (-1.04); wet seasons 2008-09
+(+1.34), 2009-10 (+1.45); 2025-26 back to +0.68 (consistent with dams at ~76 % in May 2026).
+6 consecutive drought seasons 2019-20 to 2024-25.
+
+**Step 7, weather** in progress: resumable download, Open-Meteo free limits (~26 provinces per day).
+First run (2026-11-18): 26/75 provinces, stopped cleanly at the daily limit.
+
+---
+
+## 2026-11-18: Google Earth Engine set up (for Steps 10 and 11)
+
+- Google Cloud project `DroughtMorocco` (ID `droughtmorocco`), registered for **non-commercial**
+  Earth Engine use (school project, ISGA), use type "decision-making", regional scope, category
+  "Adaptation". Quota tier **Community** (150 EECU-hours, no billing account, so no risk of charges).
+- `earthengine-api` 1.7.53 installed in the venv; the user signed in on the PC with
+  `earthengine authenticate` (token stored in the Windows user profile, not in the project).
+- Connection test: MODIS MOD13Q1 image 2024-03-05 found; NDVI around Settat in March 2024 = 0.321;
+  14 Sentinel-2 images over Al Massira dam in March 2024.
+
+---
+
+## 2026-11-18: Phase 2, Step 11 (reservoirs) done, Step 10 (vegetation) running
+
+**Reservoir list** (`scripts/09_reservoirs.py`): GRanD / GDW not found in the Earth Engine catalog,
+so outlines and names come from OpenStreetMap (Overpass API; fallback servers after a 502).
+Bug found and fixed: `out geom tags` dropped multipolygon members (all big lakes missing, 11 found);
+`out geom` gives **26 reservoirs >= 4 km²**, largest Al Wahda (95 km² in OSM), Al Massira (66 km²).
+
+**Water surface** (`scripts/10_dam_water.py`, package `08_Reservoirs`): Sentinel-2 L1C, clouds removed
+with the S2 cloud probability product (< 40 %), monthly median, NDWI = (B3-B8)/(B3+B8) > 0 = water,
+20 m scale, lake outline + 300 m. ~30 s per year in Earth Engine. 3,094 rows (26 dams x 2017-01..2026-11);
+99 % of months with >= 80 % of the lake cloud-free. `DimDam`, `FactReservoirMonthly` with fill indicator
+= water surface / largest surface observed.
+Results: Al Massira April fill 93 % (2017) -> 14 % (2024) -> 91 % (2026). Total surface of the 26 lakes
+(yearly average) 424 km² (2018) -> 275 km² (2024) -> 493 km² (2026).
+Validation vs official fill rates (volume): same order (Feb 2024 < Jan 2026 < May 2026) but higher values,
+because surface falls more slowly than volume in bowl-shaped reservoirs. Note: Nov 2026 is a partial month.
+
+**Vegetation** (`scripts/08_ndvi.py`, package `07_Vegetation`): MODIS MOD13Q1 + ESA WorldCover farmland.
+First version 215 s per month (~19 h); one request per year (12 months stacked) -> ~230 s per year (~2 h).
+Running in the background.
+
+Tests: 6 reservoir checks added to `sql/tests/phase2_tests.sql`, all PASS.
+
+**Step 10 done (23:17):** 24,075 rows (75 provinces x 321 months, 2000-02 to 2026-10), loaded with
+package `07_Vegetation`; 1,926 province-months have no farmland value (desert provinces, expected).
+Total Earth Engine time ~3 h instead of ~2 h: year 2008 took 87 min because the laptop went to sleep;
+the app's keep-awake was then turned on. 4 vegetation tests PASS.
+**Key result:** average March farmland NDVI (provinces with >= 20 % farmland) vs FAOSTAT wheat yield,
+2001-2024: correlation **0.86**. Dry years 2000, 2007, 2016, 2020, 2022 have March NDVI 0.34-0.42;
+good years 2015, 2018, 2021 have 0.60-0.64. March 2026 = 0.652, the highest since 2000 (the 2026
+harvest is not yet in FAOSTAT). This is the basis for the yield forecast (Step 15).
+
+---
+
+## 2026-11-19: Phase 3, a clean and reliable warehouse (Step 12)
+
+**Weather download:** made unstoppable. New `--until-done` mode: at the daily limit it waits for the next
+quota day (00:05 UTC) and continues; network errors (timeouts, internet cut "getaddrinfo failed") are retried
+forever with pauses up to 30 min. Laptop sleep just pauses it. Progress 42/75 at 17:50.
+
+**Load audit:** `etl.LoadAudit` + `etl.usp_LogLoad` (in `sql/02_etl_logging.sql`). Every load procedure records
+rows offered / inserted / updated / unchanged.
+
+**Change-only loads:** the 7 load procedures now update a row only when a value really changed
+(`WHEN MATCHED AND EXISTS (SELECT source EXCEPT SELECT target)`, which also compares NULLs correctly); derived
+columns (normals, anomalies, fill index) are rewritten only where they change. Bug met: a `DECLARE` placed
+between a `WITH` (CTE) and its `MERGE` (syntax error); moved above the CTE.
+
+**Performance:** `sql/10_performance.sql`, non-clustered columnstore indexes on FactWeatherDaily,
+FactDroughtIndex, FactRainfallMonthly, FactVegetationMonthly.
+**Decision:** no table partitioning (largest table ~1 M rows; partitioning pays off from tens of millions).
+
+**Tests:**
+- `sql/tests/phase3_tests.sql`: 12 checks PASS (15 foreign keys active and trusted, 0 orphans, monthly facts on
+  the 1st, yearly on 1 January, no province fact on the country row, SPI scales and categories consistent,
+  4 columnstore indexes, latest loads changed nothing).
+- `ssis/tests/run_rerun_check.ps1`: every package run twice (01-05, 07, 08); identical row counts in all 12
+  tables; second-run receipts 0 inserted / 0 updated. **PASSED.**
+- `sql/tests/phase3_incremental_demo.sql`: remove October 2026 from rainfall and reload -> receipt
+  75 inserted, 0 updated, 32,175 unchanged. **PASSED.**
+
+**Documentation:** `docs/WAREHOUSE.md` (star schema diagram, design decisions, data dictionary).
+
+**Discussion with the user, data kept for later changes:** `raw/` keeps everything as received; FAOSTAT
+(all crops, years since 1961), HCP (communes, households), boundaries, CHIRPS monthly crops and the full
+OpenStreetMap download can give new columns instantly. Earth Engine results can be recomputed in the cloud.
+Only Open-Meteo is costly (new variable = ~3 days of re-download); extra weather variables (e.g. soil
+moisture) would come from ERA5-Land in Earth Engine instead. Decision: keep 4 weather variables.
+
+**Phase 3 complete** (weather will be added to the checks when loaded).

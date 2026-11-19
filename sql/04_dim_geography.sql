@@ -1,4 +1,4 @@
--- =============================================================
+﻿-- =============================================================
 -- Morocco Drought & Water Security Observatory
 -- Phase 1 - Script 04: DimGeography (the "where" dimension)
 -- Run in SSMS after 03_staging_tables.sql. Safe to run more than once.
@@ -65,6 +65,7 @@ BEGIN
                WHERE m.HcpCode IS NULL OR b.shape_id IS NULL)
         THROW 50001, 'DimGeography: some HCP provinces have no mapping or no outline. Run scripts\03_match_provinces.py and update sql\05_map_province.sql.', 1;
 
+    DECLARE @act TABLE (a NVARCHAR(10));    -- receives INSERT / UPDATE for the load audit
     ;WITH src AS (
         SELECT h.hcp_code, h.region_code, h.region_name, h.province_name,
                ProvinceShort = LTRIM(
@@ -83,7 +84,14 @@ BEGIN
     )
     MERGE dbo.DimGeography AS t
     USING src AS s ON t.HcpCode = s.hcp_code
-    WHEN MATCHED THEN UPDATE SET
+    -- update only when something changed (EXCEPT also compares NULLs correctly)
+    WHEN MATCHED AND EXISTS (
+        SELECT s.province_name, s.ProvinceShort, s.ProvinceType, s.region_code, s.region_name, s.shape_id,
+               s.area_km2, s.point_lat, s.point_lon, s.pop_2024, s.pop_urban_2024, s.pop_rural_2024
+        EXCEPT
+        SELECT t.ProvinceName, t.ProvinceShort, t.ProvinceType, t.RegionCode, t.RegionName, t.ShapeID,
+               t.AreaKm2, t.PointLat, t.PointLon, t.Pop2024, t.PopUrban2024, t.PopRural2024)
+    THEN UPDATE SET
         ProvinceName = s.province_name, ProvinceShort = s.ProvinceShort, ProvinceType = s.ProvinceType,
         RegionCode = s.region_code, RegionName = s.region_name,
         ShapeID = s.shape_id, AreaKm2 = s.area_km2, PointLat = s.point_lat, PointLon = s.point_lon,
@@ -94,7 +102,13 @@ BEGIN
          ShapeID, AreaKm2, PointLat, PointLon, Pop2024, PopUrban2024, PopRural2024)
         VALUES ('Province', s.hcp_code, s.province_name, s.ProvinceShort, s.ProvinceType,
                 s.region_code, s.region_name, s.shape_id, s.area_km2, s.point_lat, s.point_lon,
-                s.pop_2024, s.pop_urban_2024, s.pop_rural_2024);
+                s.pop_2024, s.pop_urban_2024, s.pop_rural_2024)
+    OUTPUT $action INTO @act;
+
+    DECLARE @src INT = (SELECT COUNT(*) FROM Staging_DB.stg.HcpPopulation),
+            @ins INT = (SELECT COUNT(*) FROM @act WHERE a = 'INSERT'),
+            @upd INT = (SELECT COUNT(*) FROM @act WHERE a = 'UPDATE');
+    EXEC etl.usp_LogLoad N'dbo.DimGeography', @src, @ins, @upd;
 
     -- Country row (key 0) = sum of the provinces
     IF NOT EXISTS (SELECT 1 FROM dbo.DimGeography WHERE GeographyKey = 0)
@@ -110,7 +124,8 @@ BEGIN
     FROM dbo.DimGeography g
     CROSS JOIN (SELECT SUM(Pop2024) Pop, SUM(PopUrban2024) Urb, SUM(PopRural2024) Rur, SUM(AreaKm2) Area
                 FROM dbo.DimGeography WHERE GeoLevel = 'Province') p
-    WHERE g.GeographyKey = 0;
+    WHERE g.GeographyKey = 0
+      AND EXISTS (SELECT p.Pop, p.Urb, p.Rur, p.Area EXCEPT SELECT g.Pop2024, g.PopUrban2024, g.PopRural2024, g.AreaKm2);
 
     SELECT COUNT(*) AS RowsLoaded FROM dbo.DimGeography WHERE GeoLevel = 'Province';
 END;

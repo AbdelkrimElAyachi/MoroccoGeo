@@ -1,0 +1,263 @@
+<?xml version="1.0"?>
+<DTS:Executable xmlns:DTS="www.microsoft.com/SqlServer/Dts"
+  DTS:refId="Package"
+  DTS:CreationDate="11/18/2026 6:00:00 PM"
+  DTS:CreationName="Microsoft.Package"
+  DTS:CreatorComputerName="DESKTOP-4D3VER8"
+  DTS:CreatorName="DESKTOP-4D3VER8\USER"
+  DTS:Description="Step 6: FAOSTAT crop production 2000-2024 (Python), staging, DimCrop + FactCropProduction."
+  DTS:DTSID="{3245CE6D-1197-4532-B435-DFC95FC413EC}"
+  DTS:ExecutableType="Microsoft.Package"
+  DTS:LastModifiedProductVersion="17.0.1016.0"
+  DTS:LocaleID="1033"
+  DTS:ObjectName="03_Crops"
+  DTS:PackageType="5"
+  DTS:VersionBuild="1"
+  DTS:VersionGUID="{1B02CA1C-9E01-43FA-AB7C-525361CE2F20}">
+  <DTS:Property
+    DTS:Name="PackageFormatVersion">8</DTS:Property>
+  <DTS:ConnectionManagers>
+    <DTS:ConnectionManager
+      DTS:refId="Package.ConnectionManagers[DWH_DB]"
+      DTS:CreationName="OLEDB"
+      DTS:DTSID="{922C6A15-1693-446C-A4E6-AD41995C0864}"
+      DTS:ObjectName="DWH_DB">
+      <DTS:ObjectData>
+        <DTS:ConnectionManager
+          DTS:ConnectRetryCount="1"
+          DTS:ConnectRetryInterval="5"
+          DTS:ConnectionString="Data Source=localhost;Initial Catalog=DWH_DB;Provider=MSOLEDBSQL;Integrated Security=SSPI;Trust Server Certificate=True;Auto Translate=False;Application Name=SSIS-03_Crops;" />
+      </DTS:ObjectData>
+    </DTS:ConnectionManager>
+    <DTS:ConnectionManager
+      DTS:refId="Package.ConnectionManagers[Staging_DB]"
+      DTS:CreationName="OLEDB"
+      DTS:DTSID="{053D53B0-B7EF-4C5C-A8DD-E7C57D1336D6}"
+      DTS:ObjectName="Staging_DB">
+      <DTS:ObjectData>
+        <DTS:ConnectionManager
+          DTS:ConnectRetryCount="1"
+          DTS:ConnectRetryInterval="5"
+          DTS:ConnectionString="Data Source=localhost;Initial Catalog=Staging_DB;Provider=MSOLEDBSQL;Integrated Security=SSPI;Trust Server Certificate=True;Auto Translate=False;Application Name=SSIS-03_Crops;" />
+      </DTS:ObjectData>
+    </DTS:ConnectionManager>
+  </DTS:ConnectionManagers>
+  <DTS:Variables>
+    <DTS:Variable
+      DTS:CreationName=""
+      DTS:DTSID="{77532A90-36D1-4DA2-A95A-A29B548209CE}"
+      DTS:IncludeInDebugDump="2345"
+      DTS:Namespace="User"
+      DTS:ObjectName="ProjectRoot">
+      <DTS:VariableValue
+        DTS:DataType="8">D:\DroughtProject</DTS:VariableValue>
+    </DTS:Variable>
+    <DTS:Variable
+      DTS:CreationName=""
+      DTS:DTSID="{1E3C29BC-CF44-40ED-A163-106B1169AF9E}"
+      DTS:IncludeInDebugDump="2345"
+      DTS:Namespace="User"
+      DTS:ObjectName="PythonExe">
+      <DTS:VariableValue
+        DTS:DataType="8">D:\DroughtProject\venv\Scripts\python.exe</DTS:VariableValue>
+    </DTS:Variable>
+    <DTS:Variable
+      DTS:CreationName=""
+      DTS:DTSID="{8EC7C6F5-08D8-42D2-B6A3-534B81253669}"
+      DTS:IncludeInDebugDump="2345"
+      DTS:Namespace="User"
+      DTS:ObjectName="RowsLoaded">
+      <DTS:VariableValue
+        DTS:DataType="3">0</DTS:VariableValue>
+    </DTS:Variable>
+    <DTS:Variable
+      DTS:CreationName=""
+      DTS:DTSID="{089459EA-36B6-48F4-9E81-A1BED668675D}"
+      DTS:IncludeInDebugDump="2345"
+      DTS:Namespace="User"
+      DTS:ObjectName="RunID">
+      <DTS:VariableValue
+        DTS:DataType="3">0</DTS:VariableValue>
+    </DTS:Variable>
+  </DTS:Variables>
+  <DTS:Executables>
+    <DTS:Executable
+      DTS:refId="Package\EPT Run 04_faostat"
+      DTS:CreationName="Microsoft.ExecuteProcess"
+      DTS:Description="Runs scripts\04_faostat.py; fails if the script returns a non-zero exit code"
+      DTS:DTSID="{9AF7E600-C95B-4F8B-91C1-2FA68ADC148C}"
+      DTS:ExecutableType="Microsoft.ExecuteProcess"
+      DTS:LocaleID="-1"
+      DTS:ObjectName="EPT Run 04_faostat"
+      DTS:ThreadHint="0">
+      <DTS:Variables />
+      <DTS:PropertyExpression
+        DTS:Name="Arguments">"\"" + @[User::ProjectRoot] + "\\scripts\\04_faostat.py\" \"" + @[User::ProjectRoot] + "\""</DTS:PropertyExpression>
+      <DTS:PropertyExpression
+        DTS:Name="Executable">@[User::PythonExe]</DTS:PropertyExpression>
+      <DTS:PropertyExpression
+        DTS:Name="WorkingDirectory">@[User::ProjectRoot]</DTS:PropertyExpression>
+      <DTS:ObjectData>
+        <ExecuteProcessData
+          Executable="D:\DroughtProject\venv\Scripts\python.exe"
+          Arguments="&quot;D:\DroughtProject\scripts\04_faostat.py&quot; &quot;D:\DroughtProject&quot;"
+          WorkingDirectory="D:\DroughtProject" />
+      </DTS:ObjectData>
+    </DTS:Executable>
+    <DTS:Executable
+      DTS:refId="Package\SQL End Run Success"
+      DTS:CreationName="Microsoft.ExecuteSQLTask"
+      DTS:Description="Calls etl.usp_EndRun with Success and the row count"
+      DTS:DTSID="{8399F27B-DCAA-4F37-9B15-2A1B451185EE}"
+      DTS:ExecutableType="Microsoft.ExecuteSQLTask"
+      DTS:LocaleID="-1"
+      DTS:ObjectName="SQL End Run Success"
+      DTS:ThreadHint="0">
+      <DTS:Variables />
+      <DTS:PropertyExpression
+        DTS:Name="SqlStatementSource">"EXEC etl.usp_EndRun @RunID = " + (DT_WSTR, 12) @[User::RunID] + ", @Status = 'Success', @RowsLoaded = " + (DT_WSTR, 12) @[User::RowsLoaded] + ";"</DTS:PropertyExpression>
+      <DTS:ObjectData>
+        <SQLTask:SqlTaskData
+          SQLTask:Connection="{922C6A15-1693-446C-A4E6-AD41995C0864}"
+          SQLTask:SqlStatementSource="EXEC etl.usp_EndRun @RunID = 0, @Status = 'Success', @RowsLoaded = 0;" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask" />
+      </DTS:ObjectData>
+    </DTS:Executable>
+    <DTS:Executable
+      DTS:refId="Package\SQL Load FactCropProduction"
+      DTS:CreationName="Microsoft.ExecuteSQLTask"
+      DTS:Description="Calls dbo.usp_LoadCrops"
+      DTS:DTSID="{33B63B4C-5FA9-4BA5-AF31-59443837B45A}"
+      DTS:ExecutableType="Microsoft.ExecuteSQLTask"
+      DTS:LocaleID="-1"
+      DTS:ObjectName="SQL Load FactCropProduction"
+      DTS:ThreadHint="0">
+      <DTS:Variables />
+      <DTS:ObjectData>
+        <SQLTask:SqlTaskData
+          SQLTask:Connection="{922C6A15-1693-446C-A4E6-AD41995C0864}"
+          SQLTask:SqlStatementSource="EXEC dbo.usp_LoadCrops;"
+          SQLTask:ResultType="ResultSetType_SingleRow" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask">
+          <SQLTask:ResultBinding
+            SQLTask:ResultName="RowsLoaded"
+            SQLTask:DtsVariableName="User::RowsLoaded" />
+        </SQLTask:SqlTaskData>
+      </DTS:ObjectData>
+    </DTS:Executable>
+    <DTS:Executable
+      DTS:refId="Package\SQL Load Staging FaoCrops"
+      DTS:CreationName="Microsoft.ExecuteSQLTask"
+      DTS:Description="Empties stg.FaoCrops and BULK INSERTs clean\fao_crops.csv"
+      DTS:DTSID="{413DFB15-96A8-43CD-80C8-A4BB9616893A}"
+      DTS:ExecutableType="Microsoft.ExecuteSQLTask"
+      DTS:LocaleID="-1"
+      DTS:ObjectName="SQL Load Staging FaoCrops"
+      DTS:ThreadHint="0">
+      <DTS:Variables />
+      <DTS:PropertyExpression
+        DTS:Name="SqlStatementSource">"SET NOCOUNT ON; TRUNCATE TABLE stg.FaoCrops; BULK INSERT stg.FaoCrops FROM '" + @[User::ProjectRoot] + "\\clean\\fao_crops.csv' WITH (FIRSTROW = 2, FIELDTERMINATOR = ';', ROWTERMINATOR = '0x0a', CODEPAGE = '65001', TABLOCK);"</DTS:PropertyExpression>
+      <DTS:ObjectData>
+        <SQLTask:SqlTaskData
+          SQLTask:Connection="{053D53B0-B7EF-4C5C-A8DD-E7C57D1336D6}"
+          SQLTask:SqlStatementSource="SET NOCOUNT ON; TRUNCATE TABLE stg.FaoCrops; BULK INSERT stg.FaoCrops FROM 'D:\DroughtProject\clean\fao_crops.csv' WITH (FIRSTROW = 2, FIELDTERMINATOR = ';', ROWTERMINATOR = '0x0a', CODEPAGE = '65001', TABLOCK);" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask" />
+      </DTS:ObjectData>
+    </DTS:Executable>
+    <DTS:Executable
+      DTS:refId="Package\SQL Start Run"
+      DTS:CreationName="Microsoft.ExecuteSQLTask"
+      DTS:Description="Calls etl.usp_StartRun and stores the RunID"
+      DTS:DTSID="{01109AFB-B5FE-4B95-941C-0868F153F712}"
+      DTS:ExecutableType="Microsoft.ExecuteSQLTask"
+      DTS:LocaleID="-1"
+      DTS:ObjectName="SQL Start Run"
+      DTS:ThreadHint="0">
+      <DTS:Variables />
+      <DTS:PropertyExpression
+        DTS:Name="SqlStatementSource">"DECLARE @id INT; EXEC etl.usp_StartRun @PackageName = N'" + @[System::PackageName] + "', @RunID = @id OUTPUT; SELECT @id AS RunID;"</DTS:PropertyExpression>
+      <DTS:ObjectData>
+        <SQLTask:SqlTaskData
+          SQLTask:Connection="{922C6A15-1693-446C-A4E6-AD41995C0864}"
+          SQLTask:SqlStatementSource="DECLARE @id INT; EXEC etl.usp_StartRun @PackageName = N'03_Crops', @RunID = @id OUTPUT; SELECT @id AS RunID;"
+          SQLTask:ResultType="ResultSetType_SingleRow" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask">
+          <SQLTask:ResultBinding
+            SQLTask:ResultName="RunID"
+            SQLTask:DtsVariableName="User::RunID" />
+        </SQLTask:SqlTaskData>
+      </DTS:ObjectData>
+    </DTS:Executable>
+  </DTS:Executables>
+  <DTS:PrecedenceConstraints>
+    <DTS:PrecedenceConstraint
+      DTS:refId="Package.PrecedenceConstraints[C1]"
+      DTS:CreationName=""
+      DTS:DTSID="{F9CBF9BC-B6A4-426F-8DB9-7FC36F0A450E}"
+      DTS:From="Package\SQL Start Run"
+      DTS:LogicalAnd="True"
+      DTS:ObjectName="C1"
+      DTS:To="Package\EPT Run 04_faostat" />
+    <DTS:PrecedenceConstraint
+      DTS:refId="Package.PrecedenceConstraints[C2]"
+      DTS:CreationName=""
+      DTS:DTSID="{3D664D11-4E8D-4388-B03F-82F286DB3C1E}"
+      DTS:From="Package\EPT Run 04_faostat"
+      DTS:LogicalAnd="True"
+      DTS:ObjectName="C2"
+      DTS:To="Package\SQL Load Staging FaoCrops" />
+    <DTS:PrecedenceConstraint
+      DTS:refId="Package.PrecedenceConstraints[C3]"
+      DTS:CreationName=""
+      DTS:DTSID="{D6683E76-D5C5-4288-8ECB-EDCB3D5F0F76}"
+      DTS:From="Package\SQL Load Staging FaoCrops"
+      DTS:LogicalAnd="True"
+      DTS:ObjectName="C3"
+      DTS:To="Package\SQL Load FactCropProduction" />
+    <DTS:PrecedenceConstraint
+      DTS:refId="Package.PrecedenceConstraints[C4]"
+      DTS:CreationName=""
+      DTS:DTSID="{04DE904E-0896-44C4-9EB1-1DC671C5F575}"
+      DTS:From="Package\SQL Load FactCropProduction"
+      DTS:LogicalAnd="True"
+      DTS:ObjectName="C4"
+      DTS:To="Package\SQL End Run Success" />
+  </DTS:PrecedenceConstraints>
+  <DTS:EventHandlers>
+    <DTS:EventHandler
+      DTS:refId="Package.EventHandlers[OnError]"
+      DTS:CreationName="OnError"
+      DTS:DTSID="{AA4FF55E-F767-445D-B55C-F5F9D94C5FA7}"
+      DTS:EventID="0"
+      DTS:EventName="OnError"
+      DTS:LocaleID="-1">
+      <DTS:Variables>
+        <DTS:Variable
+          DTS:CreationName=""
+          DTS:Description="Propriété de propagation de l'événement"
+          DTS:DTSID="{9CE5DE85-5894-413C-BAAF-D1FDEC79B0B9}"
+          DTS:IncludeInDebugDump="6789"
+          DTS:Namespace="System"
+          DTS:ObjectName="Propagate">
+          <DTS:VariableValue
+            DTS:DataType="11">-1</DTS:VariableValue>
+        </DTS:Variable>
+      </DTS:Variables>
+      <DTS:Executables>
+        <DTS:Executable
+          DTS:refId="Package.EventHandlers[OnError]\SQL End Run Failed"
+          DTS:CreationName="Microsoft.ExecuteSQLTask"
+          DTS:Description="Calls etl.usp_EndRun with Failed and the error text"
+          DTS:DTSID="{6BF3B196-D61F-47B3-A5F4-BA8E7A7F8DFF}"
+          DTS:ExecutableType="Microsoft.ExecuteSQLTask"
+          DTS:LocaleID="-1"
+          DTS:ObjectName="SQL End Run Failed">
+          <DTS:Variables />
+          <DTS:PropertyExpression
+            DTS:Name="SqlStatementSource">"EXEC etl.usp_EndRun @RunID = " + (DT_WSTR, 12) @[User::RunID] + ", @Status = 'Failed', @RowsLoaded = 0, @ErrorMessage = N'" + SUBSTRING(REPLACE(@[System::ErrorDescription], "'", "''"), 1, 3500) + "';"</DTS:PropertyExpression>
+          <DTS:ObjectData>
+            <SQLTask:SqlTaskData
+              SQLTask:Connection="{922C6A15-1693-446C-A4E6-AD41995C0864}"
+              SQLTask:SqlStatementSource="EXEC etl.usp_EndRun @RunID = 0, @Status = 'Failed', @RowsLoaded = 0, @ErrorMessage = N'';" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask" />
+          </DTS:ObjectData>
+        </DTS:Executable>
+      </DTS:Executables>
+    </DTS:EventHandler>
+  </DTS:EventHandlers>
+</DTS:Executable>

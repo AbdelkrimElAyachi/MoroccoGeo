@@ -1,0 +1,263 @@
+<?xml version="1.0"?>
+<DTS:Executable xmlns:DTS="www.microsoft.com/SqlServer/Dts"
+  DTS:refId="Package"
+  DTS:CreationDate="11/18/2026 6:00:00 PM"
+  DTS:CreationName="Microsoft.Package"
+  DTS:CreatorComputerName="DESKTOP-4D3VER8"
+  DTS:CreatorName="DESKTOP-4D3VER8\USER"
+  DTS:Description="Step 8: CHIRPS v3 monthly rainfall 1991-2026 per province (Python), staging, FactRainfallMonthly."
+  DTS:DTSID="{B7F2FFD9-1659-42D8-88A8-C711AFE4C5BB}"
+  DTS:ExecutableType="Microsoft.Package"
+  DTS:LastModifiedProductVersion="17.0.1016.0"
+  DTS:LocaleID="1033"
+  DTS:ObjectName="04_Rainfall"
+  DTS:PackageType="5"
+  DTS:VersionBuild="1"
+  DTS:VersionGUID="{DBF2F928-B45E-4A72-B338-8A5C70ED36A6}">
+  <DTS:Property
+    DTS:Name="PackageFormatVersion">8</DTS:Property>
+  <DTS:ConnectionManagers>
+    <DTS:ConnectionManager
+      DTS:refId="Package.ConnectionManagers[DWH_DB]"
+      DTS:CreationName="OLEDB"
+      DTS:DTSID="{881EC9CA-4F4A-4392-8A57-85F2D6EC2413}"
+      DTS:ObjectName="DWH_DB">
+      <DTS:ObjectData>
+        <DTS:ConnectionManager
+          DTS:ConnectRetryCount="1"
+          DTS:ConnectRetryInterval="5"
+          DTS:ConnectionString="Data Source=localhost;Initial Catalog=DWH_DB;Provider=MSOLEDBSQL;Integrated Security=SSPI;Trust Server Certificate=True;Auto Translate=False;Application Name=SSIS-04_Rainfall;" />
+      </DTS:ObjectData>
+    </DTS:ConnectionManager>
+    <DTS:ConnectionManager
+      DTS:refId="Package.ConnectionManagers[Staging_DB]"
+      DTS:CreationName="OLEDB"
+      DTS:DTSID="{C202160B-2EAD-4BC6-82DB-44ADEB985318}"
+      DTS:ObjectName="Staging_DB">
+      <DTS:ObjectData>
+        <DTS:ConnectionManager
+          DTS:ConnectRetryCount="1"
+          DTS:ConnectRetryInterval="5"
+          DTS:ConnectionString="Data Source=localhost;Initial Catalog=Staging_DB;Provider=MSOLEDBSQL;Integrated Security=SSPI;Trust Server Certificate=True;Auto Translate=False;Application Name=SSIS-04_Rainfall;" />
+      </DTS:ObjectData>
+    </DTS:ConnectionManager>
+  </DTS:ConnectionManagers>
+  <DTS:Variables>
+    <DTS:Variable
+      DTS:CreationName=""
+      DTS:DTSID="{9E7DF541-C0D8-497B-BDBF-19F203244ACD}"
+      DTS:IncludeInDebugDump="2345"
+      DTS:Namespace="User"
+      DTS:ObjectName="ProjectRoot">
+      <DTS:VariableValue
+        DTS:DataType="8">D:\DroughtProject</DTS:VariableValue>
+    </DTS:Variable>
+    <DTS:Variable
+      DTS:CreationName=""
+      DTS:DTSID="{BF5BE4B8-B239-4E38-815E-E27821A6DB3E}"
+      DTS:IncludeInDebugDump="2345"
+      DTS:Namespace="User"
+      DTS:ObjectName="PythonExe">
+      <DTS:VariableValue
+        DTS:DataType="8">D:\DroughtProject\venv\Scripts\python.exe</DTS:VariableValue>
+    </DTS:Variable>
+    <DTS:Variable
+      DTS:CreationName=""
+      DTS:DTSID="{D31BB25E-2562-4888-B539-82DCDE73BD5C}"
+      DTS:IncludeInDebugDump="2345"
+      DTS:Namespace="User"
+      DTS:ObjectName="RowsLoaded">
+      <DTS:VariableValue
+        DTS:DataType="3">0</DTS:VariableValue>
+    </DTS:Variable>
+    <DTS:Variable
+      DTS:CreationName=""
+      DTS:DTSID="{FAE8509C-0F98-49D9-85DA-86D8CCAB7E5C}"
+      DTS:IncludeInDebugDump="2345"
+      DTS:Namespace="User"
+      DTS:ObjectName="RunID">
+      <DTS:VariableValue
+        DTS:DataType="3">0</DTS:VariableValue>
+    </DTS:Variable>
+  </DTS:Variables>
+  <DTS:Executables>
+    <DTS:Executable
+      DTS:refId="Package\EPT Run 05_chirps"
+      DTS:CreationName="Microsoft.ExecuteProcess"
+      DTS:Description="Runs scripts\05_chirps.py; fails if the script returns a non-zero exit code"
+      DTS:DTSID="{0D0284D2-52C2-4CFE-B8B3-67E243B0154C}"
+      DTS:ExecutableType="Microsoft.ExecuteProcess"
+      DTS:LocaleID="-1"
+      DTS:ObjectName="EPT Run 05_chirps"
+      DTS:ThreadHint="0">
+      <DTS:Variables />
+      <DTS:PropertyExpression
+        DTS:Name="Arguments">"\"" + @[User::ProjectRoot] + "\\scripts\\05_chirps.py\" \"" + @[User::ProjectRoot] + "\""</DTS:PropertyExpression>
+      <DTS:PropertyExpression
+        DTS:Name="Executable">@[User::PythonExe]</DTS:PropertyExpression>
+      <DTS:PropertyExpression
+        DTS:Name="WorkingDirectory">@[User::ProjectRoot]</DTS:PropertyExpression>
+      <DTS:ObjectData>
+        <ExecuteProcessData
+          Executable="D:\DroughtProject\venv\Scripts\python.exe"
+          Arguments="&quot;D:\DroughtProject\scripts\05_chirps.py&quot; &quot;D:\DroughtProject&quot;"
+          WorkingDirectory="D:\DroughtProject" />
+      </DTS:ObjectData>
+    </DTS:Executable>
+    <DTS:Executable
+      DTS:refId="Package\SQL End Run Success"
+      DTS:CreationName="Microsoft.ExecuteSQLTask"
+      DTS:Description="Calls etl.usp_EndRun with Success and the row count"
+      DTS:DTSID="{DD37175A-78A8-4190-8BA8-32B282413502}"
+      DTS:ExecutableType="Microsoft.ExecuteSQLTask"
+      DTS:LocaleID="-1"
+      DTS:ObjectName="SQL End Run Success"
+      DTS:ThreadHint="0">
+      <DTS:Variables />
+      <DTS:PropertyExpression
+        DTS:Name="SqlStatementSource">"EXEC etl.usp_EndRun @RunID = " + (DT_WSTR, 12) @[User::RunID] + ", @Status = 'Success', @RowsLoaded = " + (DT_WSTR, 12) @[User::RowsLoaded] + ";"</DTS:PropertyExpression>
+      <DTS:ObjectData>
+        <SQLTask:SqlTaskData
+          SQLTask:Connection="{881EC9CA-4F4A-4392-8A57-85F2D6EC2413}"
+          SQLTask:SqlStatementSource="EXEC etl.usp_EndRun @RunID = 0, @Status = 'Success', @RowsLoaded = 0;" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask" />
+      </DTS:ObjectData>
+    </DTS:Executable>
+    <DTS:Executable
+      DTS:refId="Package\SQL Load FactRainfallMonthly"
+      DTS:CreationName="Microsoft.ExecuteSQLTask"
+      DTS:Description="Calls dbo.usp_LoadRainfall"
+      DTS:DTSID="{EAF4CD82-C79E-43C4-B422-645E13536E52}"
+      DTS:ExecutableType="Microsoft.ExecuteSQLTask"
+      DTS:LocaleID="-1"
+      DTS:ObjectName="SQL Load FactRainfallMonthly"
+      DTS:ThreadHint="0">
+      <DTS:Variables />
+      <DTS:ObjectData>
+        <SQLTask:SqlTaskData
+          SQLTask:Connection="{881EC9CA-4F4A-4392-8A57-85F2D6EC2413}"
+          SQLTask:SqlStatementSource="EXEC dbo.usp_LoadRainfall;"
+          SQLTask:ResultType="ResultSetType_SingleRow" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask">
+          <SQLTask:ResultBinding
+            SQLTask:ResultName="RowsLoaded"
+            SQLTask:DtsVariableName="User::RowsLoaded" />
+        </SQLTask:SqlTaskData>
+      </DTS:ObjectData>
+    </DTS:Executable>
+    <DTS:Executable
+      DTS:refId="Package\SQL Load Staging ChirpsMonthly"
+      DTS:CreationName="Microsoft.ExecuteSQLTask"
+      DTS:Description="Empties stg.ChirpsMonthly and BULK INSERTs clean\chirps_monthly.csv"
+      DTS:DTSID="{A8ADA2C2-50F4-4E31-B085-0E533C5E6E02}"
+      DTS:ExecutableType="Microsoft.ExecuteSQLTask"
+      DTS:LocaleID="-1"
+      DTS:ObjectName="SQL Load Staging ChirpsMonthly"
+      DTS:ThreadHint="0">
+      <DTS:Variables />
+      <DTS:PropertyExpression
+        DTS:Name="SqlStatementSource">"SET NOCOUNT ON; TRUNCATE TABLE stg.ChirpsMonthly; BULK INSERT stg.ChirpsMonthly FROM '" + @[User::ProjectRoot] + "\\clean\\chirps_monthly.csv' WITH (FIRSTROW = 2, FIELDTERMINATOR = ';', ROWTERMINATOR = '0x0a', CODEPAGE = '65001', TABLOCK);"</DTS:PropertyExpression>
+      <DTS:ObjectData>
+        <SQLTask:SqlTaskData
+          SQLTask:Connection="{C202160B-2EAD-4BC6-82DB-44ADEB985318}"
+          SQLTask:SqlStatementSource="SET NOCOUNT ON; TRUNCATE TABLE stg.ChirpsMonthly; BULK INSERT stg.ChirpsMonthly FROM 'D:\DroughtProject\clean\chirps_monthly.csv' WITH (FIRSTROW = 2, FIELDTERMINATOR = ';', ROWTERMINATOR = '0x0a', CODEPAGE = '65001', TABLOCK);" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask" />
+      </DTS:ObjectData>
+    </DTS:Executable>
+    <DTS:Executable
+      DTS:refId="Package\SQL Start Run"
+      DTS:CreationName="Microsoft.ExecuteSQLTask"
+      DTS:Description="Calls etl.usp_StartRun and stores the RunID"
+      DTS:DTSID="{2C580031-016A-45FA-B89F-BFBE97D066C7}"
+      DTS:ExecutableType="Microsoft.ExecuteSQLTask"
+      DTS:LocaleID="-1"
+      DTS:ObjectName="SQL Start Run"
+      DTS:ThreadHint="0">
+      <DTS:Variables />
+      <DTS:PropertyExpression
+        DTS:Name="SqlStatementSource">"DECLARE @id INT; EXEC etl.usp_StartRun @PackageName = N'" + @[System::PackageName] + "', @RunID = @id OUTPUT; SELECT @id AS RunID;"</DTS:PropertyExpression>
+      <DTS:ObjectData>
+        <SQLTask:SqlTaskData
+          SQLTask:Connection="{881EC9CA-4F4A-4392-8A57-85F2D6EC2413}"
+          SQLTask:SqlStatementSource="DECLARE @id INT; EXEC etl.usp_StartRun @PackageName = N'04_Rainfall', @RunID = @id OUTPUT; SELECT @id AS RunID;"
+          SQLTask:ResultType="ResultSetType_SingleRow" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask">
+          <SQLTask:ResultBinding
+            SQLTask:ResultName="RunID"
+            SQLTask:DtsVariableName="User::RunID" />
+        </SQLTask:SqlTaskData>
+      </DTS:ObjectData>
+    </DTS:Executable>
+  </DTS:Executables>
+  <DTS:PrecedenceConstraints>
+    <DTS:PrecedenceConstraint
+      DTS:refId="Package.PrecedenceConstraints[C1]"
+      DTS:CreationName=""
+      DTS:DTSID="{2DA2CAAA-90A8-4CC0-BB33-080894951CF5}"
+      DTS:From="Package\SQL Start Run"
+      DTS:LogicalAnd="True"
+      DTS:ObjectName="C1"
+      DTS:To="Package\EPT Run 05_chirps" />
+    <DTS:PrecedenceConstraint
+      DTS:refId="Package.PrecedenceConstraints[C2]"
+      DTS:CreationName=""
+      DTS:DTSID="{930AAFB0-B440-4E30-9EAE-A36B6ADEEBB2}"
+      DTS:From="Package\EPT Run 05_chirps"
+      DTS:LogicalAnd="True"
+      DTS:ObjectName="C2"
+      DTS:To="Package\SQL Load Staging ChirpsMonthly" />
+    <DTS:PrecedenceConstraint
+      DTS:refId="Package.PrecedenceConstraints[C3]"
+      DTS:CreationName=""
+      DTS:DTSID="{A2793826-DD74-4419-88A9-6CB287049055}"
+      DTS:From="Package\SQL Load Staging ChirpsMonthly"
+      DTS:LogicalAnd="True"
+      DTS:ObjectName="C3"
+      DTS:To="Package\SQL Load FactRainfallMonthly" />
+    <DTS:PrecedenceConstraint
+      DTS:refId="Package.PrecedenceConstraints[C4]"
+      DTS:CreationName=""
+      DTS:DTSID="{C9979BC1-28A7-43C9-BDE2-093C3E5D9722}"
+      DTS:From="Package\SQL Load FactRainfallMonthly"
+      DTS:LogicalAnd="True"
+      DTS:ObjectName="C4"
+      DTS:To="Package\SQL End Run Success" />
+  </DTS:PrecedenceConstraints>
+  <DTS:EventHandlers>
+    <DTS:EventHandler
+      DTS:refId="Package.EventHandlers[OnError]"
+      DTS:CreationName="OnError"
+      DTS:DTSID="{7243BFB4-7019-463C-A82C-66D7F018150A}"
+      DTS:EventID="0"
+      DTS:EventName="OnError"
+      DTS:LocaleID="-1">
+      <DTS:Variables>
+        <DTS:Variable
+          DTS:CreationName=""
+          DTS:Description="Propriété de propagation de l'événement"
+          DTS:DTSID="{186023CE-D0E2-470A-99E6-15107095160D}"
+          DTS:IncludeInDebugDump="6789"
+          DTS:Namespace="System"
+          DTS:ObjectName="Propagate">
+          <DTS:VariableValue
+            DTS:DataType="11">-1</DTS:VariableValue>
+        </DTS:Variable>
+      </DTS:Variables>
+      <DTS:Executables>
+        <DTS:Executable
+          DTS:refId="Package.EventHandlers[OnError]\SQL End Run Failed"
+          DTS:CreationName="Microsoft.ExecuteSQLTask"
+          DTS:Description="Calls etl.usp_EndRun with Failed and the error text"
+          DTS:DTSID="{55E643F2-E4B1-4F45-9E1B-A81E38AB9158}"
+          DTS:ExecutableType="Microsoft.ExecuteSQLTask"
+          DTS:LocaleID="-1"
+          DTS:ObjectName="SQL End Run Failed">
+          <DTS:Variables />
+          <DTS:PropertyExpression
+            DTS:Name="SqlStatementSource">"EXEC etl.usp_EndRun @RunID = " + (DT_WSTR, 12) @[User::RunID] + ", @Status = 'Failed', @RowsLoaded = 0, @ErrorMessage = N'" + SUBSTRING(REPLACE(@[System::ErrorDescription], "'", "''"), 1, 3500) + "';"</DTS:PropertyExpression>
+          <DTS:ObjectData>
+            <SQLTask:SqlTaskData
+              SQLTask:Connection="{881EC9CA-4F4A-4392-8A57-85F2D6EC2413}"
+              SQLTask:SqlStatementSource="EXEC etl.usp_EndRun @RunID = 0, @Status = 'Failed', @RowsLoaded = 0, @ErrorMessage = N'';" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask" />
+          </DTS:ObjectData>
+        </DTS:Executable>
+      </DTS:Executables>
+    </DTS:EventHandler>
+  </DTS:EventHandlers>
+</DTS:Executable>

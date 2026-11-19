@@ -43,3 +43,5 @@ Sources (CHIRPS, Open-Meteo, MODIS, JRC/Sentinel-2, FAOSTAT, HCP, geoBoundaries)
 - [Project journal](docs/JOURNAL.md): what was done, when, and why
 - [Plan and test status](docs/PLAN.md): the 6 phases / 18 steps and their checks
 - [Data sources](docs/DATA_SOURCES.md): verified sources, links and known limits
+- [Challenges](docs/CHALLENGES.md): problems met and how they were solved (for the presentation)
+- [Warehouse](docs/WAREHOUSE.md): star schema diagram, design decisions and data dictionary

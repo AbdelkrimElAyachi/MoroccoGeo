@@ -6,3 +6,4 @@ rasterstats   # average pixels per province
 pandas        # tables and CSV output
 scipy         # SPI drought index (gamma fit)
 openpyxl      # read the HCP census Excel file
+earthengine-api  # Google Earth Engine (MODIS NDVI, Sentinel-2), project "droughtmorocco"
