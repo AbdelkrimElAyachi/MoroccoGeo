@@ -1,18 +1,28 @@
 """
-Step 11 (part 2) - Monthly water surface of Morocco's main reservoirs, 2017 -> latest,
-from Sentinel-2 via Google Earth Engine.
+Step 11 (part 2) - Monthly water surface of Morocco's main reservoirs, 2000 -> latest,
+via Google Earth Engine, from two satellite sources:
 
-For each reservoir (raw/dams/reservoirs.geojson from 09_reservoirs.py, outline + 300 m) and month:
-  1. Sentinel-2 L1C images of the month (COPERNICUS/S2_HARMONIZED, 10-20 m).
-  2. Clouds removed with the Sentinel-2 cloud probability product (probability < 40 %).
-  3. Monthly median image, then water index NDWI = (Green - NIR) / (Green + NIR) = (B3 - B8) / (B3 + B8).
-     NDWI > 0 means water (McFeeters 1996).
-  4. water_km2 = area of water pixels; clear_pct = share of the reservoir area with a cloud-free
-     value that month (months with little clear sky are flagged, not dropped).
-The 12 months of a year are computed in one request per year (cached in raw/dams/water_<year>.csv;
-current and previous year always refreshed).
+  2017 -> latest: Sentinel-2 (source "S2")
+    1. Sentinel-2 L1C images of the month (COPERNICUS/S2_HARMONIZED, 10-20 m).
+    2. Clouds removed with the Sentinel-2 cloud probability product (probability < 40 %).
+    3. Monthly median image, then water index NDWI = (Green - NIR) / (Green + NIR) = (B3 - B8) / (B3 + B8).
+       NDWI > 0 means water (McFeeters 1996).
+  2000 -> 2016: JRC Global Surface Water, monthly history (source "JRC")
+    Landsat-based water / not-water map per month at 30 m (Pekel et al. 2016), band "water":
+    0 = no data, 1 = not water, 2 = water. Coverage over Morocco is patchy before ~2013
+    (Landsat 7 sensor fault since 2003, few Landsat 5 images over Africa): those months get a low
+    clear_pct and are flagged unreliable downstream (clear_pct < 80).
+  For each reservoir (raw/dams/reservoirs.geojson, outline + 300 m) and month:
+    water_km2 = area of water pixels; clear_pct = share of the reservoir area with a valid value.
 
-Output: clean/dam_water_monthly.csv  (month_start ; dam_id ; water_km2 ; clear_pct)
+Overlap check: JRC is also computed for 2017-2021 (both sources available) and written to
+clean/dam_water_overlap.csv so the two satellites can be compared lake by lake.
+
+The 12 months of a year are computed in one request per year and source (cached in
+raw/dams/water_<year>.csv for S2, raw/dams/water_jrc_<year>.csv for JRC; the current and previous
+year of S2 are always refreshed; JRC ends in 2021 and never changes).
+
+Output: clean/dam_water_monthly.csv  (month_start ; dam_id ; water_km2 ; clear_pct ; source)
 Usage:  python 10_dam_water.py <ProjectRoot>
 """
 import csv
@@ -25,7 +35,10 @@ import ee
 import geopandas as gpd
 
 PROJECT = "droughtmorocco"
-FIRST_YEAR = 2017
+FIRST_YEAR = 2017           # first Sentinel-2 year
+JRC_FIRST_YEAR = 2000       # JRC used for 2000-2016
+JRC_LAST_YEAR = 2021        # JRC ends in December 2021; 2017-2021 used only for the overlap check
+JRC_SCALE = 30
 BUFFER_M = 300
 SCALE = 20          # metres; enough for reservoirs of several km2, 4x cheaper than 10 m
 CLOUD_PROB_MAX = 40
@@ -87,6 +100,42 @@ def fetch_year(fc, year, last: date):
     return sorted(out)
 
 
+def fetch_year_jrc(fc, year):
+    """JRC monthly water history for one year (12 months stacked, one request)."""
+    col = ee.ImageCollection("JRC/GSW1_4/MonthlyHistory").filter(ee.Filter.eq("year", year))
+    area = ee.Image.pixelArea().divide(1e6)
+    bands = []
+    for m in range(1, 13):
+        wat = ee.Image(col.filter(ee.Filter.eq("month", m)).first()).select("water")
+        bands += [area.updateMask(wat.eq(2)).rename(f"w{m:02d}"),      # water
+                  area.updateMask(wat.gt(0)).rename(f"v{m:02d}")]      # observed (water or land)
+    res = ee.Image.cat(bands + [area.rename("total")]).reduceRegions(
+        collection=fc, reducer=ee.Reducer.sum(), scale=JRC_SCALE, tileScale=4)
+    for attempt in range(4):
+        try:
+            feats = res.getInfo()["features"]
+            break
+        except Exception as e:
+            if attempt == 3:
+                raise
+            print(f"    retry JRC {year}: {str(e)[:120]}")
+            time.sleep(30 * (attempt + 1))
+    out = []
+    for f in feats:
+        p = f["properties"]
+        tot = p.get("total") or 0
+        for m in range(1, 13):
+            w, v = p.get(f"w{m:02d}") or 0, p.get(f"v{m:02d}") or 0
+            out.append([f"{year}-{m:02d}-01", int(p["dam_id"]), round(w, 3),
+                        round(100 * v / tot, 1) if tot else 0])
+    return sorted(out)
+
+
+def read_cache(path):
+    with open(path, encoding="utf-8") as fh:
+        return list(csv.reader(fh, delimiter=";"))
+
+
 def main(root: Path) -> int:
     ee.Initialize(project=PROJECT)
     cache = root / "raw" / "dams"
@@ -106,24 +155,47 @@ def main(root: Path) -> int:
         rows = fetch_year(fc, year, last)
         with open(f, "w", encoding="utf-8", newline="") as fh:
             csv.writer(fh, delimiter=";", lineterminator="\n").writerows(rows)
-        print(f"  {year}: {len(rows)} rows ({time.time() - t0:.0f}s)")
+        print(f"  S2 {year}: {len(rows)} rows ({time.time() - t0:.0f}s)")
 
-    rows = []
-    for year in range(FIRST_YEAR, last.year + 1):
-        with open(cache / f"water_{year}.csv", encoding="utf-8") as fh:
-            rows += list(csv.reader(fh, delimiter=";"))
+    for year in range(JRC_FIRST_YEAR, JRC_LAST_YEAR + 1):      # JRC never changes: cache forever
+        f = cache / f"water_jrc_{year}.csv"
+        if f.exists():
+            continue
+        rows = fetch_year_jrc(fc, year)
+        with open(f, "w", encoding="utf-8", newline="") as fh:
+            csv.writer(fh, delimiter=";", lineterminator="\n").writerows(rows)
+        print(f"  JRC {year}: {len(rows)} rows ({time.time() - t0:.0f}s)")
+
+    s2 = [r + ["S2"] for y in range(FIRST_YEAR, last.year + 1) for r in read_cache(cache / f"water_{y}.csv")]
+    jrc_all = [r for y in range(JRC_FIRST_YEAR, JRC_LAST_YEAR + 1) for r in read_cache(cache / f"water_jrc_{y}.csv")]
+    jrc = [r + ["JRC"] for r in jrc_all if int(r[0][:4]) < FIRST_YEAR]
+    rows = sorted(jrc + s2)
+
+    # Overlap 2017-2021: the same lake and month seen by both satellites
+    s2_idx = {(r[0], r[1]): r for r in s2}
+    overlap = [[r[0], r[1], r[2], r[3], s2_idx[(r[0], r[1])][2], s2_idx[(r[0], r[1])][3]]
+               for r in jrc_all if int(r[0][:4]) >= FIRST_YEAR and (r[0], r[1]) in s2_idx]
+    with open(root / "clean" / "dam_water_overlap.csv", "w", encoding="utf-8", newline="") as fh:
+        w = csv.writer(fh, delimiter=";", lineterminator="\n")
+        w.writerow(["month_start", "dam_id", "jrc_water_km2", "jrc_clear_pct", "s2_water_km2", "s2_clear_pct"])
+        w.writerows(overlap)
+
     months = sorted({r[0] for r in rows})
     errors = []
     if len(rows) != len(months) * n:
         errors.append(f"expected {len(months) * n} rows, got {len(rows)}")
-    low_clear = sum(1 for r in rows if float(r[3]) < 80)
+    if len({(r[0], r[1]) for r in rows}) != len(rows):
+        errors.append("duplicate (month, dam) rows")
+    low_jrc = sum(1 for r in jrc if float(r[3]) < 80)
+    low_s2 = sum(1 for r in s2 if float(r[3]) < 80)
 
     with open(out_csv, "w", encoding="utf-8", newline="") as fh:
         w = csv.writer(fh, delimiter=";", lineterminator="\n")
-        w.writerow(["month_start", "dam_id", "water_km2", "clear_pct"])
+        w.writerow(["month_start", "dam_id", "water_km2", "clear_pct", "source"])
         w.writerows(rows)
     print(f"Rows: {len(rows):,} | months: {months[0]} -> {months[-1]} | "
-          f"months with < 80 % clear sky: {low_clear}")
+          f"unreliable (< 80 % visible): JRC {low_jrc}/{len(jrc)}, S2 {low_s2}/{len(s2)} | "
+          f"overlap pairs 2017-2021: {len(overlap)}")
     print(f"Written: {out_csv}")
     if errors:
         for e in errors:

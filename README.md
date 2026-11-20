@@ -46,3 +46,4 @@ Sources (CHIRPS, Open-Meteo, MODIS, JRC/Sentinel-2, FAOSTAT, HCP, geoBoundaries)
 - [Challenges](docs/CHALLENGES.md): problems met and how they were solved (for the presentation)
 - [Warehouse](docs/WAREHOUSE.md): star schema diagram, design decisions and data dictionary
 - [Model](docs/MODEL.md): SSAS Tabular model, measures and reconciliation with SQL
+- [Dashboards](docs/DASHBOARDS.md): Power BI setup and page-by-page guide

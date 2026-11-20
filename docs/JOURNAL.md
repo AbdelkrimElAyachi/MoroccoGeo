@@ -340,3 +340,74 @@ now ends with one more load (receipt 0 inserted / 0 updated), so both files pass
   wheat 2024, 61 provinces / 33,089,522 people in drought in Aug 2022, Settat 57.9 % of normal rain in 2024,
   Al Massira 14.6 % in Apr 2024, Settat NDVI 0.686 in Mar 2021).
 - Documentation: `docs/MODEL.md`. Weather measures exist but show nothing until the weather is loaded.
+
+## 2026-11-19: Phase 4, Step 14 preparation (Power BI)
+
+- A Power BI report is built visually in Power BI Desktop; generating it as files is not reliable, so the
+  user builds the pages and the project provides the assets and a guide.
+- `scripts/tools/make_topojson.py` -> `powerbi/morocco_provinces.topojson` (75 provinces, 195 KB, keys =
+  `ProvinceShort` taken from DimGeography, so map and model match exactly; ProvinceShort checked unique).
+- 5 new measures: Drought Category (latest), Drought Color (latest) (for conditional formatting), Data Up To
+  ("Données jusqu'à octobre 2026"), Selected Period, NDVI Farmland (March). Model: 37 measures, reconciliation
+  14/14 PASS (new check: Settat drought class Aug 2022 = 5, "Sécheresse modérée").
+- `powerbi/drought_theme.json` (colours), `docs/DASHBOARDS.md` (setup + 7 pages: overview with province map,
+  rainfall and drought, agriculture, dams, climate, province drill-through, forecast later).
+- The report will be saved as a Power BI project (.pbip) in `powerbi/` so it can be versioned in Git.
+
+**Building page 1 with the user (Power BI 2.159):** differences from usual tutorials: no Shape map entry in
+preview features; themes under *Conception*; several visuals are called "Carte" (number card = "23" icon with a
+lightning bolt, fields box *Valeur*; the globe and the filled map are geographic maps); the new card has no
+obvious *Unités d'affichage*, so the automatic "K" display is kept (a millions measure was tried and removed).
+Questions answered: *Rain % of Normal* = 97.6 % with "Tout" is correct (1991-2020 alone = 100.0 %);
+"--" for 2008 meant zero provinces in drought, so *Provinces in Drought* and *People in Drought* now return 0
+when SPI data exists (blank only without data). Reconciliation still 14/14.
+
+---
+
+## 2026-11-19: Dams extended back to 2000 (JRC + Sentinel-2)
+
+Asked by the user after seeing the *Fill Index* card empty for 2010.
+- Source for 2000-2016: **JRC Global Surface Water monthly history** (`JRC/GSW1_4/MonthlyHistory`, Landsat, 30 m,
+  band `water`: 0 no data / 1 land / 2 water), in Earth Engine, ~5 s per year. Sentinel-2 kept from 2017.
+- Coverage problem found before building: over Morocco, JRC months are patchy before ~2013 (Landsat 7 sensor
+  fault since 2003, few Landsat 5 images over Africa): e.g. 2005 and 2006 have 1 good month out of 12 for the
+  3 largest lakes; 2013-2021 have 9-10. Decision: keep every month with its % of the lake visible; months with
+  < 80 % visible are flagged unreliable (2,240 of 5,304 JRC rows, 6 of 3,094 S2 rows).
+- **Overlap check 2017-2021** (both sources, both reliable, 1,269 lake-months): correlation **0.997**, total
+  surface ratio JRC / S2 **0.987**, median difference **0.22 km²**. Only two almost-empty desert reservoirs
+  (Sakia El Hamra, Fask, ~0.1 km²) disagree. The series are joined: JRC 2000-2016, S2 2017+, `Source` column.
+- Measures changed: each dam uses **its own latest reliable month** in the period (`Dam Water Latest (km2)`),
+  so gaps or clouds never make a lake look emptier. Model: 38 measures; reconciliation 14/14.
+- Consequence: the largest surface is now often from 2009-2015 (Al Massira 90.9 km² in June 2010, was 74.8 km²
+  with 2017+ only), so fill percentages are lower than before for the same water: Al Massira April 2026 =
+  68.7 km² = 75.5 % (was 91 %), April 2024 = 12 %. Test rewritten to "April 2026 > 70 % and > 5 x April 2024".
+- Load receipt: 5,304 inserted (JRC), 5 updated (newest S2 months refreshed), 3,089 unchanged; re-run 0/0.
+- New tests: sources in the right periods, series starts January 2000, overlap correlation >= 0.95,
+  ratio 0.9-1.1. Phase 2 and Phase 3 tests all PASS.
+- All 26 dams, fill index at year end: 49 % (2000) ... 79 % (2009) ... 43 % (2023) ... 83 % (2026);
+  Al Massira 96-100 % in 2009-2011, 7 % in 2023.
+
+---
+
+## 2026-11-20: Step 7 done, weather loaded (Phase 2 complete)
+
+- Download finished on the 3rd day (64 → 75 provinces; the previous session had ended while the script was
+  waiting for the next quota day, it resumed from disk). SQL Server had to be started by the user after a PC
+  restart (starting a Windows service needs administrator rights).
+- **Problem caught by the final check:** provinces downloaded on different days ended on different days
+  (13,099 / 13,100 / 13,101 days), because each request asks for data "up to 7 days ago". Fix: when combining,
+  every province is cut to the last day they all share (2026-11-11), so every day has all 75 provinces.
+- `clean/weather_daily.csv`: 982,425 rows (75 x 13,099 days, 1991-01-01 → 2026-11-11), 51 MB. Package
+  `06_Weather`: loaded in 17 s; receipt 982,425 inserted; re-run 0 / 0.
+- **Independent rain check:** CHIRPS vs Open-Meteo (ERA5) monthly rain: correlation 0.83 per province-month
+  (32,250), 0.92 national (430 months); Open-Meteo 14 % lower overall (typical for a weather model).
+- First result: national average daily maximum temperature 23.2 °C (1991) → 26.2 °C (2023), 25.4 °C (2025).
+  Most hot days (Tmax >= 35 °C) in 2023: Aousserd 182, Tata 146, Oued Ed-Dahab 144.
+- Tests: Phase 2 all PASS with no step skipped (new: every day has 75 provinces, rain cross-check >= 0.85);
+  Phase 3 PASS; model reprocessed, reconciliation 16/16 (new: weather rows, national Tmax 2023 = 26.23 °C).
+
+**Power BI project damaged by the restart:** `DroughtObservatory.pbip`, `Report/definition.pbir` and 4 files
+in `DroughtObservatory.SemanticModel/` were all zeros (same save time 2026-11-19 21:46:39); no AutoRecovery or
+TempSaves copy. Report definition (page 1, 7 visuals) intact. Backed up the folder, rebuilt `.pbip`
+(artifact = report) and `definition.pbir` (version 4.0, `byConnection` "Data Source=localhost;Initial
+Catalog=DroughtModel"), renamed the semantic-model folder to `.damaged` (ignored by Git).

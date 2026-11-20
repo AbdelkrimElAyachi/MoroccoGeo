@@ -133,7 +133,18 @@ def main(root: Path, max_hours: float, until_done: bool = False) -> int:
         print(f"INCOMPLETE: {len(done)}/{len(provinces)} provinces downloaded. Run again later to continue.")
         return 2
 
-    # All provinces on disk: combine, check, write the clean file
+    # All provinces on disk: combine, check, write the clean file.
+    # Provinces downloaded on different days end on different days ("7 days ago" moves): cut every
+    # province to the last day they ALL have, so every day has all 75 provinces.
+    last_days = {}
+    for p in provinces:
+        with open(raw_dir / f"{p['shape_id']}.csv", encoding="utf-8") as f:
+            last_days[p["shape_id"]] = max(r[0] for r in csv.reader(f, delimiter=";") if r)
+    common_end = min(last_days.values())
+    if len(set(last_days.values())) > 1:
+        print(f"Provinces end between {common_end} and {max(last_days.values())}: "
+              f"all cut to the common last day {common_end}")
+
     errors, n_rows = [], 0
     expected_days = None
     with open(out_csv, "w", encoding="utf-8", newline="") as out:
@@ -141,7 +152,7 @@ def main(root: Path, max_hours: float, until_done: bool = False) -> int:
         w.writerow(["day", "shape_id", "tmax_c", "tmin_c", "precip_mm", "et0_mm"])
         for p in provinces:
             with open(raw_dir / f"{p['shape_id']}.csv", encoding="utf-8") as f:
-                rows = list(csv.reader(f, delimiter=";"))
+                rows = [r for r in csv.reader(f, delimiter=";") if r and r[0] <= common_end]
             expected_days = expected_days or len(rows)
             if len(rows) != expected_days:
                 errors.append(f"{p['shape_name']}: {len(rows)} days instead of {expected_days}")

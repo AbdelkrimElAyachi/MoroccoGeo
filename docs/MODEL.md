@@ -49,8 +49,9 @@ Hierarchies: **Calendar** (Year → Month), **Agricultural season** (Season → 
 | | NDVI Farmland Normal | 2001-2020 average for the same months |
 | | NDVI Farmland Anomaly | difference from normal (negative = less green) |
 | | NDVI All Land | greenness of all land |
-| Reservoirs | Water Surface (km2) | water surface of the selected dams at the last month |
-| | Max Water Surface (km2) | largest surface ever observed |
+| Reservoirs | Dam Water Latest (km2) | one dam's water surface at its latest reliable month in the period |
+| | Water Surface (km2) | sum over the selected dams, each at its latest reliable month (≥ 80 % visible) |
+| | Max Water Surface (km2) | largest surface ever observed (2000-2026), for the dams with a value |
 | | Fill Index | surface / largest surface (surface, not volume) |
 | Crops | Production (t), Area Harvested (ha), Yield (kg/ha) | FAOSTAT, national |
 | | Wheat Production (t), Wheat Yield (kg/ha) | wheat only |

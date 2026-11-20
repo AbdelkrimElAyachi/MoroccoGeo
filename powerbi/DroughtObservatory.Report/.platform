@@ -1,0 +1,11 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "Report",
+    "displayName": "DroughtObservatory"
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "c2417b6b-4c16-4a09-94bf-dbd3e1430c14"
+  }
+}

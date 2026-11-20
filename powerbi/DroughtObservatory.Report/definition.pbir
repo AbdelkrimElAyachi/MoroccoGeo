@@ -1,0 +1,14 @@
+{
+  "version": "1.0",
+  "datasetReference": {
+    "byPath": null,
+    "byConnection": {
+      "connectionString": "Data Source=localhost;Initial Catalog=DroughtModel",
+      "pbiServiceModelId": null,
+      "pbiModelVirtualServerName": "sobe_wowvirtualserver",
+      "pbiModelDatabaseName": null,
+      "name": "EntityDataSource",
+      "connectionType": "analysisServicesDatabase"
+    }
+  }
+}

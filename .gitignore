@@ -13,3 +13,8 @@ ssis/**/.vs/
 *.user
 *.suo
 *.database
+
+# Power BI project: keep the definition, not the local cache / settings
+powerbi/**/.pbi/localSettings.json
+powerbi/**/.pbi/cache.abf
+powerbi/*.damaged/

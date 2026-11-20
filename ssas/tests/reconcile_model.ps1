@@ -22,6 +22,9 @@ $tests = @(
   @{ n = 'Rows: drought index';            dax = 'EVALUATE ROW("v", COUNTROWS(Drought))';             sql = 'SELECT COUNT(*) FROM dbo.FactDroughtIndex' },
   @{ n = 'Rows: vegetation';               dax = 'EVALUATE ROW("v", COUNTROWS(Vegetation))';          sql = 'SELECT COUNT(*) FROM dbo.FactVegetationMonthly' },
   @{ n = 'Rows: reservoirs';               dax = 'EVALUATE ROW("v", COUNTROWS(Reservoir))';           sql = 'SELECT COUNT(*) FROM dbo.FactReservoirMonthly' },
+  @{ n = 'Rows: weather';                  dax = 'EVALUATE ROW("v", COUNTROWS(Weather))';             sql = 'SELECT COUNT(*) FROM dbo.FactWeatherDaily' },
+  @{ n = 'National avg Tmax 2023 (2 dec)'; dax = "EVALUATE ROW(""v"", ROUND(CALCULATE([Avg Max Temperature (C)], 'Date'[Year] = 2023), 2))";
+                                           sql = 'SELECT CAST(ROUND(AVG(TmaxC), 2) AS DECIMAL(5,2)) FROM dbo.FactWeatherDaily WHERE DateKey BETWEEN 20230101 AND 20231231' },
   @{ n = 'Rows: crop production';          dax = "EVALUATE ROW(""v"", COUNTROWS('Crop Production'))"; sql = 'SELECT COUNT(*) FROM dbo.FactCropProduction' },
   @{ n = 'Population 2024';                dax = 'EVALUATE ROW("v", [Population 2024])';              sql = "SELECT SUM(Pop2024) FROM dbo.DimGeography WHERE GeoLevel = 'Province'" },
   @{ n = 'Wheat production 2024 (t)';      dax = "EVALUATE ROW(""v"", ROUND(CALCULATE([Wheat Production (t)], 'Date'[Year] = 2024), 0))";
@@ -36,6 +39,8 @@ $tests = @(
                                            sql = "SELECT CAST(ROUND(100.0 * SUM(f.RainMm) / SUM(f.NormalMm), 1) AS DECIMAL(9,1)) FROM dbo.FactRainfallMonthly f JOIN dbo.DimGeography g ON g.GeographyKey = f.GeographyKey WHERE g.ProvinceShort = N'Settat' AND f.DateKey BETWEEN 20240101 AND 20241201" },
   @{ n = 'Al Massira fill index Apr 2024 (1 dec)'; dax = "EVALUATE ROW(""v"", ROUND(100 * CALCULATE([Fill Index], 'Date'[Year] = 2024, 'Date'[Month] = 4, Dam[DamName] = ""Barrage Al Massira""), 1))";
                                            sql = "SELECT CAST(ROUND(100.0 * f.WaterKm2 / d.MaxWaterKm2, 1) AS DECIMAL(5,1)) FROM dbo.FactReservoirMonthly f JOIN dbo.DimDam d ON d.DamKey = f.DamKey WHERE d.DamName = N'Barrage Al Massira' AND f.DateKey = 20240401" },
+  @{ n = 'Settat drought class Aug 2022 (key)'; dax = "EVALUATE ROW(""v"", CALCULATE(MAX('Drought Category'[DroughtCategoryKey]), FILTER(ALL('Drought Category'), 'Drought Category'[CategoryFr] = CALCULATE([Drought Category (latest)], 'Date'[Year] = 2022, 'Date'[Month] = 8, Province[ProvinceShort] = ""Settat""))))";
+                                           sql = "SELECT f.DroughtCategoryKey FROM dbo.FactDroughtIndex f JOIN dbo.DimGeography g ON g.GeographyKey = f.GeographyKey WHERE g.ProvinceShort = N'Settat' AND f.SpiScale = 12 AND f.DateKey = 20220801" },
   @{ n = 'Settat NDVI farmland Mar 2021 (3 dec)'; dax = "EVALUATE ROW(""v"", ROUND(CALCULATE([NDVI Farmland], 'Date'[Year] = 2021, 'Date'[Month] = 3, Province[ProvinceShort] = ""Settat""), 3))";
                                            sql = "SELECT CAST(ROUND(f.NdviCrop, 3) AS DECIMAL(6,3)) FROM dbo.FactVegetationMonthly f JOIN dbo.DimGeography g ON g.GeographyKey = f.GeographyKey WHERE g.ProvinceShort = N'Settat' AND f.DateKey = 20210301" }
 )

@@ -33,9 +33,9 @@ erDiagram
 | `FactRainfallMonthly` | province × month | 1991-01 → 2026-10 | 32,250 | CHIRPS v3 |
 | `FactDroughtIndex` | province × month × SPI scale (1/3/6/12) | 1991 → 2026-10 | 127,578 | computed from CHIRPS |
 | `FactVegetationMonthly` | province × month | 2000-02 → 2026-10 | 24,075 | MODIS + ESA WorldCover (Earth Engine) |
-| `FactReservoirMonthly` | dam × month | 2017-01 → 2026-11 | 3,094 | Sentinel-2 (Earth Engine) + OpenStreetMap |
+| `FactReservoirMonthly` | dam × month | 2000-01 → 2026-11 | 8,398 | JRC (Landsat) 2000-2016 + Sentinel-2 2017+ (Earth Engine), OpenStreetMap outlines |
 | `FactCropProduction` | crop × year (national) | 2000 → 2024 | 2,546 | FAOSTAT |
-| `FactWeatherDaily` | province × day | 1991-01-01 → recent | ~982,000 (loading) | Open-Meteo (ERA5) |
+| `FactWeatherDaily` | province × day | 1991-01-01 → 2026-11-11 | 982,425 | Open-Meteo (ERA5) |
 
 All foreign keys are enforced and trusted, so a fact row can't point to a province, date,
 crop, dam or category that doesn't exist.
@@ -153,6 +153,7 @@ Each class also has a `ColorHex` for maps.
 | ClearPct | share of the lake seen without clouds |
 | IsReliable | ClearPct ≥ 80 % |
 | FillIndexPct | WaterKm2 / MaxWaterKm2 × 100 (surface, not volume) |
+| Source | 'JRC' (Landsat, 2000-2016) or 'S2' (Sentinel-2, 2017 onwards) |
 
 **`FactCropProduction`**
 | Column | Meaning |

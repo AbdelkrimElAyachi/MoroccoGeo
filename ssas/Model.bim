@@ -664,10 +664,10 @@
           },
           {
             "name": "Provinces in Drought",
-            "expression": "COUNTROWS ( FILTER ( VALUES ( Province[GeographyKey] ), [SPI-12 Latest Month] <= -1 ) )",
+            "expression": "IF ( NOT ISBLANK ( [SPI-12 Latest Month] ), COUNTROWS ( FILTER ( VALUES ( Province[GeographyKey] ), [SPI-12 Latest Month] <= -1 ) ) + 0 )",
             "formatString": "#,0",
             "displayFolder": "Drought index",
-            "description": "Provinces with SPI-12 <= -1 at the last month of the period."
+            "description": "Provinces with SPI-12 <= -1 at the last month of the period (0 if none)."
           },
           {
             "name": "Provinces with SPI",
@@ -683,16 +683,40 @@
           },
           {
             "name": "People in Drought",
-            "expression": "SUMX ( FILTER ( VALUES ( Province[GeographyKey] ), [SPI-12 Latest Month] <= -1 ), CALCULATE ( SUM ( Province[Pop2024] ) ) )",
+            "expression": "IF ( NOT ISBLANK ( [SPI-12 Latest Month] ), SUMX ( FILTER ( VALUES ( Province[GeographyKey] ), [SPI-12 Latest Month] <= -1 ), CALCULATE ( SUM ( Province[Pop2024] ) ) ) + 0 )",
             "formatString": "#,0",
             "displayFolder": "Drought index",
-            "description": "2024 population of the provinces in drought (SPI-12 <= -1)."
+            "description": "2024 population of the provinces in drought (SPI-12 <= -1), 0 if none."
           },
           {
             "name": "% Population in Drought",
             "expression": "DIVIDE ( [People in Drought], [Population 2024] )",
             "formatString": "0.0 %",
             "displayFolder": "Drought index"
+          },
+          {
+            "name": "Drought Category (latest)",
+            "expression": "VAR v = [SPI-12 Latest Month] RETURN IF ( ISBLANK ( v ), BLANK (), CALCULATE ( MAX ( 'Drought Category'[CategoryFr] ), FILTER ( ALL ( 'Drought Category' ), v >= 'Drought Category'[MinSpi] && v < 'Drought Category'[MaxSpi] ) ) )",
+            "displayFolder": "Labels",
+            "description": "Drought class (French) of the SPI-12 at the last month of the period."
+          },
+          {
+            "name": "Drought Color (latest)",
+            "expression": "VAR v = [SPI-12 Latest Month] RETURN IF ( ISBLANK ( v ), \"#BFBFBF\", CALCULATE ( MAX ( 'Drought Category'[ColorHex] ), FILTER ( ALL ( 'Drought Category' ), v >= 'Drought Category'[MinSpi] && v < 'Drought Category'[MaxSpi] ) ) )",
+            "displayFolder": "Labels",
+            "description": "Colour of that class, for conditional formatting (field value)."
+          },
+          {
+            "name": "Data Up To",
+            "expression": "\"Données jusqu'à \" & FORMAT ( CALCULATE ( MAX ( 'Date'[Date] ), REMOVEFILTERS ( 'Date' ), Rainfall ), \"mmmm yyyy\" )",
+            "displayFolder": "Labels",
+            "description": "Last month with rainfall data, for page subtitles."
+          },
+          {
+            "name": "Selected Period",
+            "expression": "VAR d1 = CALCULATE ( MIN ( 'Date'[Date] ), Rainfall ) VAR d2 = CALCULATE ( MAX ( 'Date'[Date] ), Rainfall ) RETURN FORMAT ( d1, \"mmm yyyy\" ) & \" - \" & FORMAT ( d2, \"mmm yyyy\" )",
+            "displayFolder": "Labels",
+            "description": "First and last month with data in the current selection."
           }
         ]
       },
@@ -801,6 +825,13 @@
             "expression": "AVERAGE ( Vegetation[NdviAll] )",
             "formatString": "0.000",
             "displayFolder": "Vegetation"
+          },
+          {
+            "name": "NDVI Farmland (March)",
+            "expression": "CALCULATE ( [NDVI Farmland], 'Date'[Month] = 3, REMOVEFILTERS ( 'Date'[Month], 'Date'[MonthNameFr], 'Date'[MonthNameAr], 'Date'[MonthStart], 'Date'[Date], 'Date'[DateKey] ) )",
+            "formatString": "0.000",
+            "displayFolder": "Vegetation",
+            "description": "Farmland greenness in March of the selected year(s): best early sign of the harvest (r = 0.86 with wheat yield)."
           }
         ]
       },
@@ -847,6 +878,12 @@
             "sourceColumn": "FillIndexPct",
             "summarizeBy": "none",
             "isHidden": true
+          },
+          {
+            "name": "Source",
+            "dataType": "string",
+            "sourceColumn": "Source",
+            "summarizeBy": "none"
           }
         ],
         "partitions": [
@@ -862,17 +899,25 @@
         ],
         "measures": [
           {
-            "name": "Water Surface (km2)",
-            "expression": "VAR d = CALCULATE ( MAX ( Reservoir[DateKey] ) ) RETURN CALCULATE ( SUM ( Reservoir[WaterKm2] ), REMOVEFILTERS ( 'Date' ), 'Date'[DateKey] = d )",
+            "name": "Dam Water Latest (km2)",
+            "expression": "VAR d = CALCULATE ( MAX ( Reservoir[DateKey] ), Reservoir[IsReliable] = TRUE () ) RETURN IF ( NOT ISBLANK ( d ), CALCULATE ( SUM ( Reservoir[WaterKm2] ), REMOVEFILTERS ( 'Date' ), 'Date'[DateKey] = d ) )",
             "formatString": "#,0.0",
             "displayFolder": "Reservoirs",
-            "description": "Water surface of the selected dams at the last month of the period (Sentinel-2)."
+            "description": "Water surface of one dam at its latest reliable month in the period."
+          },
+          {
+            "name": "Water Surface (km2)",
+            "expression": "SUMX ( VALUES ( Dam[DamKey] ), [Dam Water Latest (km2)] )",
+            "formatString": "#,0.0",
+            "displayFolder": "Reservoirs",
+            "description": "Water surface of the selected dams, each at its latest reliable month in the period (JRC Landsat 2000-2016, Sentinel-2 2017+)."
           },
           {
             "name": "Max Water Surface (km2)",
-            "expression": "SUM ( Dam[MaxWaterKm2] )",
+            "expression": "SUMX ( VALUES ( Dam[DamKey] ), IF ( NOT ISBLANK ( [Dam Water Latest (km2)] ), CALCULATE ( SUM ( Dam[MaxWaterKm2] ) ) ) )",
             "formatString": "#,0.0",
-            "displayFolder": "Reservoirs"
+            "displayFolder": "Reservoirs",
+            "description": "Largest surface ever observed, for the dams that have a value in the period."
           },
           {
             "name": "Fill Index",

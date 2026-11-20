@@ -51,7 +51,7 @@ SELECT DateKey, GeographyKey, NdviCrop, NdviAll, CropSharePct, NdviCropNormal, N
 FROM dbo.FactVegetationMonthly;
 GO
 CREATE OR ALTER VIEW bi.FactReservoir AS
-SELECT DateKey, DamKey, WaterKm2, ClearPct, IsReliable, FillIndexPct FROM dbo.FactReservoirMonthly;
+SELECT DateKey, DamKey, WaterKm2, ClearPct, IsReliable, FillIndexPct, Source FROM dbo.FactReservoirMonthly;
 GO
 CREATE OR ALTER VIEW bi.FactCropProduction AS
 SELECT DateKey, GeographyKey, CropKey, [Year], AreaHa, YieldKgHa, ProductionT FROM dbo.FactCropProduction;

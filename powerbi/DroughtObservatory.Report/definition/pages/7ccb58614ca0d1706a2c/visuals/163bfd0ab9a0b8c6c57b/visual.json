@@ -1,0 +1,74 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.14.0/schema.json",
+  "name": "163bfd0ab9a0b8c6c57b",
+  "position": {
+    "x": 235,
+    "y": 81,
+    "z": 3,
+    "height": 150,
+    "width": 209,
+    "tabOrder": 3
+  },
+  "visual": {
+    "visualType": "cardVisual",
+    "query": {
+      "queryState": {
+        "Data": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Drought"
+                    }
+                  },
+                  "Property": "People in Drought"
+                }
+              },
+              "queryRef": "Drought.People in Drought",
+              "nativeQueryRef": "People in Drought"
+            }
+          ]
+        }
+      },
+      "sortDefinition": {
+        "sort": [
+          {
+            "field": {
+              "Measure": {
+                "Expression": {
+                  "SourceRef": {
+                    "Entity": "Drought"
+                  }
+                },
+                "Property": "People in Drought"
+              }
+            },
+            "direction": "Descending"
+          }
+        ],
+        "isDefaultSort": true
+      }
+    },
+    "drillFilterOtherVisuals": true
+  },
+  "filterConfig": {
+    "filters": [
+      {
+        "name": "ff6fb3010ba79ed50625",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "Drought"
+              }
+            },
+            "Property": "People in Drought"
+          }
+        },
+        "type": "Advanced"
+      }
+    ]
+  }
+}

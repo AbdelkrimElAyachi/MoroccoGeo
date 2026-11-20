@@ -24,12 +24,26 @@ CREATE TABLE stg.Reservoirs (
     lon           DECIMAL(9,5)  NOT NULL,
     shape_id      VARCHAR(40)   NOT NULL
 );
+-- (re-created if an older version without the source column exists)
+IF OBJECT_ID('stg.DamWaterMonthly') IS NOT NULL AND COL_LENGTH('stg.DamWaterMonthly', 'source') IS NULL
+    DROP TABLE stg.DamWaterMonthly;
 IF OBJECT_ID('stg.DamWaterMonthly') IS NULL
 CREATE TABLE stg.DamWaterMonthly (
     month_start   DATE          NOT NULL,
     dam_id        INT           NOT NULL,
     water_km2     DECIMAL(9,3)  NOT NULL,
-    clear_pct     DECIMAL(5,1)  NOT NULL
+    clear_pct     DECIMAL(5,1)  NOT NULL,
+    source        VARCHAR(10)   NOT NULL    -- 'JRC' (Landsat, 2000-2016) or 'S2' (Sentinel-2, 2017+)
+);
+-- Same lake and month seen by both satellites (2017-2021), for the consistency test
+IF OBJECT_ID('stg.DamWaterOverlap') IS NULL
+CREATE TABLE stg.DamWaterOverlap (
+    month_start    DATE         NOT NULL,
+    dam_id         INT          NOT NULL,
+    jrc_water_km2  DECIMAL(9,3) NOT NULL,
+    jrc_clear_pct  DECIMAL(5,1) NOT NULL,
+    s2_water_km2   DECIMAL(9,3) NOT NULL,
+    s2_clear_pct   DECIMAL(5,1) NOT NULL
 );
 GO
 
@@ -75,8 +89,13 @@ CREATE TABLE dbo.FactReservoirMonthly (
     ClearPct      DECIMAL(5,1) NOT NULL,      -- share of the lake seen without clouds
     IsReliable    BIT          NOT NULL,      -- ClearPct >= 80
     FillIndexPct  DECIMAL(5,1) NULL,          -- WaterKm2 / MaxWaterKm2 x 100 (satellite fill indicator)
+    Source        VARCHAR(10)  NOT NULL DEFAULT 'S2',   -- 'JRC' (2000-2016) or 'S2' (2017+)
     CONSTRAINT PK_FactReservoirMonthly PRIMARY KEY (DateKey, DamKey)
 );
+GO
+IF COL_LENGTH('dbo.FactReservoirMonthly', 'Source') IS NULL
+    ALTER TABLE dbo.FactReservoirMonthly ADD Source VARCHAR(10) NOT NULL
+        CONSTRAINT DF_FactReservoirMonthly_Source DEFAULT 'S2';
 GO
 
 -- ---------- Load procedures ----------
@@ -137,16 +156,17 @@ BEGIN
     DECLARE @act TABLE (a NVARCHAR(10));
     MERGE dbo.FactReservoirMonthly AS t
     USING (SELECT DateKey = CONVERT(INT, CONVERT(CHAR(8), w.month_start, 112)), d.DamKey,
-                  w.water_km2, w.clear_pct, IsReliable = CASE WHEN w.clear_pct >= 80 THEN 1 ELSE 0 END
+                  w.water_km2, w.clear_pct, IsReliable = CASE WHEN w.clear_pct >= 80 THEN 1 ELSE 0 END,
+                  w.source
            FROM Staging_DB.stg.DamWaterMonthly w
            JOIN Staging_DB.stg.Reservoirs r ON r.dam_id = w.dam_id
            JOIN dbo.DimDam d ON d.DamName = r.dam_name) AS s
     ON t.DateKey = s.DateKey AND t.DamKey = s.DamKey
-    WHEN MATCHED AND EXISTS (SELECT s.water_km2, s.clear_pct, s.IsReliable
-                             EXCEPT SELECT t.WaterKm2, t.ClearPct, t.IsReliable)
-        THEN UPDATE SET WaterKm2 = s.water_km2, ClearPct = s.clear_pct, IsReliable = s.IsReliable
-    WHEN NOT MATCHED THEN INSERT (DateKey, DamKey, WaterKm2, ClearPct, IsReliable)
-        VALUES (s.DateKey, s.DamKey, s.water_km2, s.clear_pct, s.IsReliable)
+    WHEN MATCHED AND EXISTS (SELECT s.water_km2, s.clear_pct, s.IsReliable, s.source
+                             EXCEPT SELECT t.WaterKm2, t.ClearPct, t.IsReliable, t.Source)
+        THEN UPDATE SET WaterKm2 = s.water_km2, ClearPct = s.clear_pct, IsReliable = s.IsReliable, Source = s.source
+    WHEN NOT MATCHED THEN INSERT (DateKey, DamKey, WaterKm2, ClearPct, IsReliable, Source)
+        VALUES (s.DateKey, s.DamKey, s.water_km2, s.clear_pct, s.IsReliable, s.source)
     OUTPUT $action INTO @act;
 
     DECLARE @src INT = (SELECT COUNT(*) FROM Staging_DB.stg.DamWaterMonthly),

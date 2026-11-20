@@ -138,18 +138,40 @@ drought = table("Drought", "bi.FactDrought", [
             "Average SPI-12 over the selection (0 normal, <= -1 drought)."),
     measure("SPI-12 Latest Month", SPI_AT_LAST.format(k=12), N2, "Drought index",
             "SPI-12 at the last month of the selected period."),
+    # "+ 0" only when SPI data exists: shows 0 (not blank) when no province is in drought,
+    # but stays blank for periods without any data
     measure("Provinces in Drought",
-            "COUNTROWS ( FILTER ( VALUES ( Province[GeographyKey] ), [SPI-12 Latest Month] <= -1 ) )",
-            INT, "Drought index", "Provinces with SPI-12 <= -1 at the last month of the period."),
+            "IF ( NOT ISBLANK ( [SPI-12 Latest Month] ), "
+            "COUNTROWS ( FILTER ( VALUES ( Province[GeographyKey] ), [SPI-12 Latest Month] <= -1 ) ) + 0 )",
+            INT, "Drought index", "Provinces with SPI-12 <= -1 at the last month of the period (0 if none)."),
     measure("Provinces with SPI",
             "COUNTROWS ( FILTER ( VALUES ( Province[GeographyKey] ), NOT ISBLANK ( [SPI-12 Latest Month] ) ) )",
             INT, "Drought index"),
     measure("% Provinces in Drought", "DIVIDE ( [Provinces in Drought], [Provinces with SPI] )", PCT, "Drought index"),
     measure("People in Drought",
+            "IF ( NOT ISBLANK ( [SPI-12 Latest Month] ), "
             "SUMX ( FILTER ( VALUES ( Province[GeographyKey] ), [SPI-12 Latest Month] <= -1 ), "
-            "CALCULATE ( SUM ( Province[Pop2024] ) ) )",
-            INT, "Drought index", "2024 population of the provinces in drought (SPI-12 <= -1)."),
+            "CALCULATE ( SUM ( Province[Pop2024] ) ) ) + 0 )",
+            INT, "Drought index", "2024 population of the provinces in drought (SPI-12 <= -1), 0 if none."),
     measure("% Population in Drought", "DIVIDE ( [People in Drought], [Population 2024] )", PCT, "Drought index"),
+    # labels and colours used by the dashboards (Step 14)
+    measure("Drought Category (latest)",
+            "VAR v = [SPI-12 Latest Month] RETURN IF ( ISBLANK ( v ), BLANK (), "
+            "CALCULATE ( MAX ( 'Drought Category'[CategoryFr] ), FILTER ( ALL ( 'Drought Category' ), "
+            "v >= 'Drought Category'[MinSpi] && v < 'Drought Category'[MaxSpi] ) ) )",
+            None, "Labels", "Drought class (French) of the SPI-12 at the last month of the period."),
+    measure("Drought Color (latest)",
+            "VAR v = [SPI-12 Latest Month] RETURN IF ( ISBLANK ( v ), \"#BFBFBF\", "
+            "CALCULATE ( MAX ( 'Drought Category'[ColorHex] ), FILTER ( ALL ( 'Drought Category' ), "
+            "v >= 'Drought Category'[MinSpi] && v < 'Drought Category'[MaxSpi] ) ) )",
+            None, "Labels", "Colour of that class, for conditional formatting (field value)."),
+    measure("Data Up To",
+            "\"Données jusqu'à \" & FORMAT ( CALCULATE ( MAX ( 'Date'[Date] ), REMOVEFILTERS ( 'Date' ), Rainfall ), \"mmmm yyyy\" )",
+            None, "Labels", "Last month with rainfall data, for page subtitles."),
+    measure("Selected Period",
+            "VAR d1 = CALCULATE ( MIN ( 'Date'[Date] ), Rainfall ) VAR d2 = CALCULATE ( MAX ( 'Date'[Date] ), Rainfall ) "
+            "RETURN FORMAT ( d1, \"mmm yyyy\" ) & \" - \" & FORMAT ( d2, \"mmm yyyy\" )",
+            None, "Labels", "First and last month with data in the current selection."),
 ])
 
 veg = table("Vegetation", "bi.FactVegetation", [
@@ -165,18 +187,34 @@ veg = table("Vegetation", "bi.FactVegetation", [
     measure("NDVI Farmland Anomaly", "[NDVI Farmland] - [NDVI Farmland Normal]", "+0.000;-0.000;0.000",
             "Vegetation", "Negative = less green than usual."),
     measure("NDVI All Land", "AVERAGE ( Vegetation[NdviAll] )", N4, "Vegetation"),
+    measure("NDVI Farmland (March)",
+            "CALCULATE ( [NDVI Farmland], 'Date'[Month] = 3, "
+            "REMOVEFILTERS ( 'Date'[Month], 'Date'[MonthNameFr], 'Date'[MonthNameAr], 'Date'[MonthStart], 'Date'[Date], 'Date'[DateKey] ) )",
+            N4, "Vegetation",
+            "Farmland greenness in March of the selected year(s): best early sign of the harvest (r = 0.86 with wheat yield)."),
 ])
 
 res = table("Reservoir", "bi.FactReservoir", [
     col("DateKey", I, hidden=True), col("DamKey", I, hidden=True),
     col("WaterKm2", D, hidden=True), col("ClearPct", D, hidden=True), col("IsReliable", B),
-    col("FillIndexPct", D, hidden=True),
+    col("FillIndexPct", D, hidden=True), col("Source", S),
 ], measures=[
+    # Each dam uses ITS OWN latest reliable month (>= 80 % of the lake visible) in the period:
+    # a cloudy month or a Landsat gap never makes a lake look emptier than it is.
+    measure("Dam Water Latest (km2)",
+            "VAR d = CALCULATE ( MAX ( Reservoir[DateKey] ), Reservoir[IsReliable] = TRUE () ) "
+            "RETURN IF ( NOT ISBLANK ( d ), "
+            "CALCULATE ( SUM ( Reservoir[WaterKm2] ), REMOVEFILTERS ( 'Date' ), 'Date'[DateKey] = d ) )",
+            N1, "Reservoirs", "Water surface of one dam at its latest reliable month in the period."),
     measure("Water Surface (km2)",
-            "VAR d = CALCULATE ( MAX ( Reservoir[DateKey] ) ) "
-            "RETURN CALCULATE ( SUM ( Reservoir[WaterKm2] ), REMOVEFILTERS ( 'Date' ), 'Date'[DateKey] = d )",
-            N1, "Reservoirs", "Water surface of the selected dams at the last month of the period (Sentinel-2)."),
-    measure("Max Water Surface (km2)", "SUM ( Dam[MaxWaterKm2] )", N1, "Reservoirs"),
+            "SUMX ( VALUES ( Dam[DamKey] ), [Dam Water Latest (km2)] )",
+            N1, "Reservoirs",
+            "Water surface of the selected dams, each at its latest reliable month in the period "
+            "(JRC Landsat 2000-2016, Sentinel-2 2017+)."),
+    measure("Max Water Surface (km2)",
+            "SUMX ( VALUES ( Dam[DamKey] ), IF ( NOT ISBLANK ( [Dam Water Latest (km2)] ), "
+            "CALCULATE ( SUM ( Dam[MaxWaterKm2] ) ) ) )",
+            N1, "Reservoirs", "Largest surface ever observed, for the dams that have a value in the period."),
     measure("Fill Index", "DIVIDE ( [Water Surface (km2)], [Max Water Surface (km2)] )", PCT, "Reservoirs",
             "Water surface / largest surface observed (surface, not volume)."),
 ])

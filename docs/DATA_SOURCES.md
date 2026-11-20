@@ -21,7 +21,7 @@ All sources are real and open. "Verified" = tested by download or API call on 20
 | CHIRPS | 1991-2026 | monthly (30-year SPI reference 1991-2020) |
 | Open-Meteo | 1991-2026 | daily: Tmax, Tmin, rain, ET0 |
 | MODIS NDVI | 2000-2026 | monthly mean per province (Earth Engine) |
-| Dams | 2017-2026 | monthly, Sentinel-2 (Earth Engine); JRC not used |
+| Dams | 2000-2026 | monthly: JRC monthly water history 2000-2016 (Landsat, patchy before 2013, unreliable months flagged) + Sentinel-2 2017+ (Earth Engine); agreement on 2017-2021: r = 0.997 |
 | FAOSTAT | 2000-2024 | yearly |
 | HCP census | 2024 | |
 

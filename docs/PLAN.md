@@ -25,11 +25,11 @@ Phase 1 tests: `sql/tests/phase1_tests.sql` (20 checks). Run all: `ssis/tests/ru
 | Step | What | Checks | Status |
 |---|---|---|---|
 | 6 | FAOSTAT crops 2000-2024 | wheat 2024 = 2,441,670 t; 2021 = 7,543,848 t; 25 years; no duplicates | ✅ |
-| 7 | Open-Meteo weather, daily 1991-2026 | same days for all 75 provinces; realistic values; no duplicates on re-run | 🟡 downloading (rate limits, ~3 days) |
+| 7 | Open-Meteo weather, daily 1991-2026 | same days for all 75 provinces; realistic values; no duplicates on re-run; rain cross-check with CHIRPS | ✅ (982,425 rows, r = 0.92 with CHIRPS) |
 | 8 | CHIRPS rainfall, monthly 1991-2026 | 430 monthly files (1991-01 to 2026-10); 75 x 430 = 32,250 rows; wet north / dry south; July ~ 0 | ✅ |
 | 9 | Normals (1991-2020) + SPI | SPI mean ~ 0, std ~ 1 over 1991-2020; 1994-95, 2021-22, 2023-24 dry; 2009-10 wet | ✅ |
 | 10 | MODIS NDVI, monthly 2000-2026 (Earth Engine) | values -0.2..1; spring peak; spring 2021 greener than 2024 | ✅ |
-| 11 | Dam water surface 2017-2026 (Sentinel-2, Earth Engine) + official rates | 26 dams; Al Massira < 30 % in Apr 2024, > 80 % in Apr 2026; same order as official rates | ✅ |
+| 11 | Dam water surface 2000-2026 (JRC 2000-2016 + Sentinel-2 2017+, Earth Engine) + official rates | 26 dams; JRC vs S2 overlap r ≥ 0.95; Al Massira < 30 % in Apr 2024 and strong recovery in Apr 2026; same order as official rates | ✅ |
 
 Periods and size rules: see the 2026-11-18 decision in [JOURNAL.md](JOURNAL.md).
 

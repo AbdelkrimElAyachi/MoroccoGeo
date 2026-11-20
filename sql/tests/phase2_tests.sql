@@ -1,4 +1,4 @@
--- =============================================================
+﻿-- =============================================================
 -- Phase 2 tests (Steps 6-9; Step 7 weather once downloaded).
 -- Every line should show Result = PASS. Weather tests show SKIP until the data is loaded.
 -- =============================================================
@@ -69,12 +69,31 @@ BEGIN
     INSERT @t SELECT 'Step 11', N'Reservoirs (OpenStreetMap, >= 4 km2)', N'26', CAST((SELECT COUNT(*) FROM dbo.DimDam) AS NVARCHAR(60));
     INSERT @t SELECT 'Step 11', N'Rows = dams x months', CAST((SELECT COUNT(*) FROM dbo.DimDam) * (SELECT COUNT(DISTINCT DateKey) FROM dbo.FactReservoirMonthly) AS NVARCHAR(60)),
         CAST((SELECT COUNT(*) FROM dbo.FactReservoirMonthly) AS NVARCHAR(60));
-    INSERT @t SELECT 'Step 11', N'Reliable months (>= 80 % clear) >= 95 %', N'1',
-        CAST((SELECT CASE WHEN AVG(CAST(IsReliable AS FLOAT)) >= 0.95 THEN 1 ELSE 0 END FROM dbo.FactReservoirMonthly) AS NVARCHAR(60));
+    INSERT @t SELECT 'Step 11', N'Sentinel-2 months reliable (>= 80 % visible) >= 95 %', N'1',
+        CAST((SELECT CASE WHEN AVG(CAST(IsReliable AS FLOAT)) >= 0.95 THEN 1 ELSE 0 END FROM dbo.FactReservoirMonthly WHERE Source = 'S2') AS NVARCHAR(60));
+    INSERT @t SELECT 'Step 11', N'Sources: JRC before 2017, Sentinel-2 from 2017 (rows in the wrong period)', N'0',
+        CAST((SELECT COUNT(*) FROM dbo.FactReservoirMonthly
+              WHERE (Source = 'JRC' AND DateKey >= 20170101) OR (Source = 'S2' AND DateKey < 20170101)) AS NVARCHAR(60));
+    INSERT @t SELECT 'Step 11', N'Series starts in January 2000', N'20000101',
+        CAST((SELECT MIN(DateKey) FROM dbo.FactReservoirMonthly) AS NVARCHAR(60));
+    -- Same lake and month seen by both satellites (2017-2021, both reliable): they must agree
+    INSERT @t SELECT 'Step 11', N'JRC vs Sentinel-2 overlap: correlation >= 0.95', N'1',
+        CAST((SELECT CASE WHEN (COUNT(*) * SUM(x * y) - SUM(x) * SUM(y))
+                       / SQRT((COUNT(*) * SUM(x * x) - SUM(x) * SUM(x)) * (COUNT(*) * SUM(y * y) - SUM(y) * SUM(y))) >= 0.95
+                  THEN 1 ELSE 0 END
+              FROM (SELECT CAST(jrc_water_km2 AS FLOAT) x, CAST(s2_water_km2 AS FLOAT) y FROM Staging_DB.stg.DamWaterOverlap
+                    WHERE jrc_clear_pct >= 80 AND s2_clear_pct >= 80) o) AS NVARCHAR(60));
+    INSERT @t SELECT 'Step 11', N'JRC vs Sentinel-2 overlap: total surface ratio within 0.9-1.1', N'1',
+        CAST((SELECT CASE WHEN SUM(jrc_water_km2) / SUM(s2_water_km2) BETWEEN 0.9 AND 1.1 THEN 1 ELSE 0 END
+              FROM Staging_DB.stg.DamWaterOverlap WHERE jrc_clear_pct >= 80 AND s2_clear_pct >= 80) AS NVARCHAR(60));
     INSERT @t SELECT 'Step 11', N'Al Massira fill April 2024 < 30 % (drought)', N'1',
         CAST((SELECT CASE WHEN FillIndexPct < 30 THEN 1 ELSE 0 END FROM dbo.FactReservoirMonthly WHERE DamKey = @massira AND DateKey = 20240401) AS NVARCHAR(60));
-    INSERT @t SELECT 'Step 11', N'Al Massira fill April 2026 > 80 % (recovery)', N'1',
-        CAST((SELECT CASE WHEN FillIndexPct > 80 THEN 1 ELSE 0 END FROM dbo.FactReservoirMonthly WHERE DamKey = @massira AND DateKey = 20260401) AS NVARCHAR(60));
+    -- Reference = largest surface since 2000 (June 2010, 90.9 km2); April 2026 = 68.7 km2 = 75.5 %
+    INSERT @t SELECT 'Step 11', N'Al Massira recovery: April 2026 > 70 % and > 5 x April 2024', N'1',
+        CAST((SELECT CASE WHEN MAX(CASE WHEN DateKey = 20260401 THEN FillIndexPct END) > 70
+                           AND MAX(CASE WHEN DateKey = 20260401 THEN WaterKm2 END) > 5 * MAX(CASE WHEN DateKey = 20240401 THEN WaterKm2 END)
+                          THEN 1 ELSE 0 END
+              FROM dbo.FactReservoirMonthly WHERE DamKey = @massira) AS NVARCHAR(60));
     INSERT @t SELECT 'Step 11', N'Satellite index follows official order: Feb 2024 < Jan 2026 < May 2026', N'1',
         CAST((SELECT CASE WHEN a < b AND b < c THEN 1 ELSE 0 END FROM (
               SELECT SUM(CASE WHEN f.DateKey = 20240201 THEN f.WaterKm2 END) / SUM(CASE WHEN f.DateKey = 20240201 THEN d.MaxWaterKm2 END) a,
@@ -113,6 +132,20 @@ BEGIN
         CAST((SELECT COUNT(*) FROM dbo.FactWeatherDaily WHERE TmaxC NOT BETWEEN -15 AND 55) AS NVARCHAR(60));
     INSERT @t SELECT 'Step 7', N'Starts 1991-01-01', N'19910101',
         CAST((SELECT MIN(DateKey) FROM dbo.FactWeatherDaily) AS NVARCHAR(60));
+    INSERT @t SELECT 'Step 7', N'Every day has all 75 provinces (days with fewer)', N'0',
+        CAST((SELECT COUNT(*) FROM (SELECT DateKey FROM dbo.FactWeatherDaily GROUP BY DateKey HAVING COUNT(*) <> 75) x) AS NVARCHAR(60));
+    -- Independent check of the rainfall: CHIRPS (satellite + stations) vs Open-Meteo (ERA5 model),
+    -- national monthly totals must move together
+    INSERT @t SELECT 'Step 7', N'Rain cross-check CHIRPS vs Open-Meteo, national monthly correlation >= 0.85', N'1',
+        CAST((SELECT CASE WHEN (COUNT(*) * SUM(x * y) - SUM(x) * SUM(y))
+                       / SQRT((COUNT(*) * SUM(x * x) - SUM(x) * SUM(x)) * (COUNT(*) * SUM(y * y) - SUM(y) * SUM(y))) >= 0.85
+                  THEN 1 ELSE 0 END
+              FROM (SELECT ch.MonthStart, AVG(CAST(ch.r AS FLOAT)) x, AVG(CAST(om.p AS FLOAT)) y
+                    FROM (SELECT f.GeographyKey, d.[Date] MonthStart, f.RainMm r FROM dbo.FactRainfallMonthly f JOIN dbo.DimDate d ON d.DateKey = f.DateKey) ch
+                    JOIN (SELECT w.GeographyKey, d.MonthStart, SUM(w.PrecipMm) p FROM dbo.FactWeatherDaily w JOIN dbo.DimDate d ON d.DateKey = w.DateKey
+                          GROUP BY w.GeographyKey, d.MonthStart) om
+                      ON om.GeographyKey = ch.GeographyKey AND om.MonthStart = ch.MonthStart
+                    GROUP BY ch.MonthStart) n) AS NVARCHAR(60));
 END
 ELSE
     INSERT @t SELECT 'Step 7', N'Weather loaded', N'SKIP', N'SKIP';

@@ -54,11 +54,12 @@ PACKAGES = {
              "conn": "DWH_DB", "sql": "EXEC dbo.usp_LoadVegetation;", "rows": True},
         ]),
     "08_Reservoirs": dict(
-        description="Step 11: reservoir list (OpenStreetMap) and monthly water surface 2017-2026 (Sentinel-2, Earth Engine), DimDam + FactReservoirMonthly.",
+        description="Step 11: reservoir list (OpenStreetMap) and monthly water surface 2000-2026 (JRC Landsat 2000-2016, Sentinel-2 2017+, Earth Engine), DimDam + FactReservoirMonthly.",
         python_script=["09_reservoirs.py", "10_dam_water.py"],
         sql_steps=[
             bulk_insert_step("stg.Reservoirs", "reservoirs.csv"),
             bulk_insert_step("stg.DamWaterMonthly", "dam_water_monthly.csv"),
+            bulk_insert_step("stg.DamWaterOverlap", "dam_water_overlap.csv"),
             {"name": "SQL Load FactReservoirMonthly", "desc": "Calls dbo.usp_LoadReservoirs",
              "conn": "DWH_DB", "sql": "EXEC dbo.usp_LoadReservoirs;", "rows": True},
         ]),

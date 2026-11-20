@@ -1,0 +1,74 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.14.0/schema.json",
+  "name": "4502c0ea4c7500600680",
+  "position": {
+    "x": 475,
+    "y": 81,
+    "z": 4,
+    "height": 150,
+    "width": 194,
+    "tabOrder": 4
+  },
+  "visual": {
+    "visualType": "cardVisual",
+    "query": {
+      "queryState": {
+        "Data": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Rainfall"
+                    }
+                  },
+                  "Property": "Rain % of Normal"
+                }
+              },
+              "queryRef": "Rainfall.Rain % of Normal",
+              "nativeQueryRef": "Rain % of Normal"
+            }
+          ]
+        }
+      },
+      "sortDefinition": {
+        "sort": [
+          {
+            "field": {
+              "Measure": {
+                "Expression": {
+                  "SourceRef": {
+                    "Entity": "Rainfall"
+                  }
+                },
+                "Property": "Rain % of Normal"
+              }
+            },
+            "direction": "Descending"
+          }
+        ],
+        "isDefaultSort": true
+      }
+    },
+    "drillFilterOtherVisuals": true
+  },
+  "filterConfig": {
+    "filters": [
+      {
+        "name": "bb22d603073bc04c58d9",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "Rainfall"
+              }
+            },
+            "Property": "Rain % of Normal"
+          }
+        },
+        "type": "Advanced"
+      }
+    ]
+  }
+}

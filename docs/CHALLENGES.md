@@ -21,8 +21,12 @@ Updated as the project goes on (newest at the end of each section).
 | SPI values computed | 127,578 (75 provinces × 4 time scales × ~430 months) |
 | Worst drought season | 2021-22: 61 of 75 provinces in drought (SPI-12 ≤ -1), 33 M people |
 | Consecutive drought seasons | 6 (2019-20 to 2024-25) |
-| Reservoirs monitored from space | 26 (Sentinel-2, monthly 2017-2026, 99 % of months cloud-free enough) |
-| Al Massira (2nd largest dam), April fill indicator | 93 % (2017) → 14 % (2024) → 91 % (2026) |
+| Reservoirs monitored from space | 26, monthly 2000-2026 (JRC Landsat 2000-2016 + Sentinel-2 2017+) |
+| JRC vs Sentinel-2 on 2017-2021 | correlation 0.997, totals within 1.3 % |
+| Daily weather | 982,425 rows (75 provinces × 13,099 days), downloaded over 3 days within free limits |
+| Rain: CHIRPS vs Open-Meteo (ERA5) | national monthly correlation 0.92 |
+| National average daily max temperature | 23.2 °C (1991) → 26.2 °C (2023) |
+| Al Massira (2nd largest dam), water surface | 90.9 km² full (June 2010) → 10.9 km² (April 2024, 12 %) → 68.7 km² (April 2026, 75 %) |
 | Total water surface of the 26 lakes (yearly avg) | 424 km² (2018) → 275 km² (2024) → 493 km² (2026) |
 | Vegetation computation in Earth Engine | 19 h → 2 h (one request per year instead of per month) |
 | March farmland greenness (NDVI) vs wheat yield, 2001-2024 | correlation 0.86 |
@@ -89,6 +93,15 @@ Updated as the project goes on (newest at the end of each section).
   next quota day at the daily limit, resume after laptop sleep. One command finishes the job over several days.
 - **Choice:** asking a friend to download the rest on another connection would have bypassed the free
   limit, against the spirit of Open-Meteo's terms; we chose to wait one more day instead.
+- **Last trap:** downloading over 3 days meant provinces ended on different days (13,099 to 13,101 days,
+  because "up to 7 days ago" moves every day). The final check refused the file; fix: cut every province to
+  the last common day, so every day has all 75 provinces. Result: 982,425 rows, loaded in 17 seconds.
+
+### 2.3b An independent check of the rainfall
+- **Question:** is the satellite rainfall (CHIRPS) right? We had no rain gauges of our own.
+- **Answer:** compare it with a completely different source, the ERA5 weather model behind Open-Meteo:
+  monthly correlation **0.92** nationally (0.83 province by province), ERA5 14 % lower in total.
+- **Shows:** two independent methods telling the same story, so the drought index can be trusted.
 
 ### 2.4 A download that froze for 20 minutes
 - **Problem:** first test: 2.6 s per CHIRPS month. During the full run the download froze on April 1993:
@@ -127,6 +140,19 @@ Updated as the project goes on (newest at the end of each section).
 - **Also:** the main OpenStreetMap server answered "502 Bad Gateway" (overloaded); the script now falls back
   to two other public servers automatically.
 - **Shows:** a missing result is a clue: "why are the biggest lakes absent?" led to the bug.
+
+### 2.4e Joining two satellites into one 26-year series
+- **Goal:** dam water from 2000 (like the other data), not only from 2017 (Sentinel-2).
+- **Problem 1, gaps:** the older source (JRC, Landsat) is patchy over Morocco before 2013 (Landsat 7 sensor
+  fault since 2003, few Landsat 5 images over Africa): in 2005-2006 only 1 month in 12 shows the big lakes clearly.
+  **Solution:** keep each month with its "% of the lake visible", flag < 80 % as unreliable, and let every
+  measure use each dam's latest reliable month, so a gap never looks like an empty lake.
+- **Problem 2, consistency:** two satellites could measure the same lake differently.
+  **Solution:** compare them where both exist (2017-2021): 1,269 lake-months, correlation **0.997**,
+  JRC 1.3 % lower in total, typical difference 0.22 km². Joined with a `Source` column, tested automatically.
+- **Side effect:** the "largest surface ever seen" moved to 2010 for Al Massira (90.9 km², lake full), so
+  percentages are now measured against a truer full state (April 2026: 75.5 % instead of 91 %).
+- **Shows:** extending history honestly: measure the gaps, prove the sources agree, flag what is uncertain.
 
 ### 2.5 Hidden "no data" values
 - **Problem:** CHIRPS ocean pixels contain -9999 but the file does not declare it as "no data".
@@ -195,6 +221,17 @@ Updated as the project goes on (newest at the end of each section).
   **75 inserted, 0 updated, 32,175 unchanged**.
 - **Shows:** reliability you can prove with numbers, required before automating monthly runs.
 
+### 4.7 "--" on a card: blank is not the same as zero
+- **Problem:** in the report, *People in Drought* showed "--" for 2008. It looked like missing data.
+- **Cause:** in December 2008 no province was in drought (0 of 75, average SPI-12 +0.56). Counting an empty
+  list returns *blank* in DAX, and Power BI draws blank as "--".
+- **Solution:** the measures return **0** when SPI data exists but no province is in drought, and stay blank
+  only when there is no data at all (e.g. 1990, before the first SPI-12 value).
+- **Also noticed while testing:** with both slicers on "Tout", *Rain % of Normal* shows 97.6 %, not 100 %.
+  Correct: the normal is 1991-2020 (exactly 100.0 % over those years), and adding the dry years 2021-2026
+  pulls the long-term ratio down. 2019-2025 alone: 74.9 % of normal.
+- **Shows:** checking what a dashboard *means* to a reader, not only whether the number is right.
+
 ### 4.4 Satellite water surface is not the same as official dam volume
 - **Observation:** the satellite fill indicator (water surface / largest surface seen) is higher than the
   official fill rate (volume / capacity): Feb 2024 satellite 45.5 % vs official ~23 %; Jan 2026 72.2 % vs 45.2 %;
@@ -213,6 +250,17 @@ Updated as the project goes on (newest at the end of each section).
   Settat 57.9 % of its normal rain in 2024; Al Massira 14.6 % full (surface) in April 2024.
 - **Shows:** dashboards you can trust because every key number is checked against its source.
 
+### 4.8 The Power BI project would not open after a PC restart
+- **Problem:** Power BI: *"Cannot read DroughtObservatory.pbip. Error reading JObject… position 190"*.
+- **Cause:** 6 small files saved at the same second (21:46:39) were filled with zeros, most likely by the
+  abrupt shutdown while Power BI was writing them: the `.pbip` shortcut, `definition.pbir` (the live connection
+  to SSAS) and 4 files of the semantic-model reference. The report itself (page 1, 7 visuals) was intact.
+- **Fix:** scanned every file for "all zeros", backed up the folder, rebuilt the two essential files from the
+  standard PBIP format (shortcut → `DroughtObservatory.Report`; live connection → `localhost` / `DroughtModel`),
+  set the damaged model-reference folder aside (not needed for a live connection).
+- **Lesson:** the `powerbi/` folder had never been committed, so Git could not restore it. Commit dashboard
+  work like code, as soon as a page works.
+
 ## 5. Tools and environment
 
 | Problem | Cause | Solution |
@@ -227,3 +275,6 @@ Updated as the project goes on (newest at the end of each section).
 | Laptop RAM (14.8 GB) shared by SQL Server, SSAS, VS, Power BI | SQL Server takes all RAM by default | SQL Server max memory 4 GB; daily (not hourly) weather |
 | SSAS can't read the warehouse | It reads data with its own Windows service account | Read-only login for `NT Service\MSSQLServerOLAPService` (`db_datareader` on DWH_DB) |
 | Building the Tabular model click by click is slow and not reproducible | Designer-only workflow | Model written as code (`build_model.py` → `Model.bim`), deployed by script |
+| Tutorials say "enable Shape map in Preview features", but the option is not in the list | Power BI 2.159 (Nov 2026) changed the preview list | Look for the visual directly in the Visualisations pane; fallbacks Azure Maps or an AppSource custom visual |
+| Tutorials say themes are under *Affichage*; not there | Power BI 2.159 moved them | **Conception → Thèmes → ▼ → Rechercher des thèmes** |
+| Power BI maps don't know Moroccan provinces by name | Built-in maps geocode names online | Custom province map (TopoJSON) generated from our own boundaries with the model's exact names |

@@ -1,0 +1,28 @@
+{
+  "name": "Morocco Drought Observatory",
+  "dataColors": [
+    "#3D7CC9",
+    "#E07B39",
+    "#4E9A6B",
+    "#B3261E",
+    "#8DB8E8",
+    "#F4C26B",
+    "#6B6B6B",
+    "#1F4E9C"
+  ],
+  "background": "#FFFFFF",
+  "foreground": "#252423",
+  "tableAccent": "#3D7CC9",
+  "good": "#4E9A6B",
+  "neutral": "#F4C26B",
+  "bad": "#B3261E",
+  "maximum": "#1F4E9C",
+  "center": "#F2F2F2",
+  "minimum": "#B3261E",
+  "textClasses": {
+    "title": { "fontFace": "Segoe UI Semibold", "fontSize": 14, "color": "#252423" },
+    "header": { "fontFace": "Segoe UI Semibold", "fontSize": 12, "color": "#252423" },
+    "label": { "fontFace": "Segoe UI", "fontSize": 10, "color": "#605E5C" },
+    "callout": { "fontFace": "Segoe UI Semibold", "fontSize": 28, "color": "#252423" }
+  }
+}
