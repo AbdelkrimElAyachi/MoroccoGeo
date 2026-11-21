@@ -383,8 +383,7 @@ puis 493 km² (2026).</p>
 depuis 2014 (136 mm en moyenne par province).</p>
 
 <h2 class='new'>9. Difficultés rencontrées et solutions</h2>
-<p>Chaque problème a été consigné au moment où il est apparu ; la liste complète, avec les preuves, est dans
-<code>docs/CHALLENGES.md</code>.</p>
+<p>Chaque problème a été consigné au moment où il est apparu, avec sa cause, sa solution et la preuve qu'elle fonctionne.</p>
 {PROBLEMS}
 
 <h2 class='new'>10. État d'avancement et prochaines étapes</h2>
@@ -404,8 +403,8 @@ depuis 2014 (136 mm en moyenne par province).</p>
 <li>geoBoundaries, Maroc ADM2 (github.com/wmgeolab/geoBoundaries)</li>
 <li>Méthode SPI : OMM, <i>Standardized Precipitation Index User Guide</i> (OMM-n° 1090, 2012)</li>
 </ul>
-<p>Documents du projet : <code>docs/JOURNAL.md</code> (journal daté), <code>docs/PLAN.md</code>, <code>docs/DATA_SOURCES.md</code>,
-<code>docs/WAREHOUSE.md</code>, <code>docs/MODEL.md</code>, <code>docs/DASHBOARDS.md</code>, <code>docs/CHALLENGES.md</code>.</p>
+<p>Documents du projet : <code>docs/JOURNAL.md</code> (journal daté), <code>docs/DATA_SOURCES.md</code>,
+<code>docs/WAREHOUSE.md</code>, <code>docs/MODEL.md</code>.</p>
 """
 
 OUT_HTML.write_text(f"<!doctype html><html lang='fr'><head><meta charset='utf-8'><title>Rapport - Observatoire de la sécheresse au Maroc</title>"

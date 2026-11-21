@@ -24,7 +24,7 @@ Details and limits in [DATA_SOURCES.md](DATA_SOURCES.md).
   by hand for validation.
 - FAOSTAT is national only. Regional crop data must come from HCP yearbooks.
 
-**Plan:** 6 phases, 18 steps, each with tests (see [PLAN.md](PLAN.md)).
+**Plan:** 6 phases, 18 steps, each with tests.
 
 ---
 
@@ -350,7 +350,7 @@ now ends with one more load (receipt 0 inserted / 0 updated), so both files pass
 - 5 new measures: Drought Category (latest), Drought Color (latest) (for conditional formatting), Data Up To
   ("Données jusqu'à octobre 2026"), Selected Period, NDVI Farmland (March). Model: 37 measures, reconciliation
   14/14 PASS (new check: Settat drought class Aug 2022 = 5, "Sécheresse modérée").
-- `powerbi/drought_theme.json` (colours), `docs/DASHBOARDS.md` (setup + 7 pages: overview with province map,
+- `powerbi/drought_theme.json` (colours) (Power BI setup + 7 pages: overview with province map,
   rainfall and drought, agriculture, dams, climate, province drill-through, forecast later).
 - The report will be saved as a Power BI project (.pbip) in `powerbi/` so it can be versioned in Git.
 

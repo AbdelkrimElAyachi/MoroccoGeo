@@ -33,7 +33,7 @@ docs/report/rapport.html
 video_kit/
 video_kit.zip
 
-# Local tool settings (editor, Claude Code), secrets, OS and Office junk
+# Local tool settings, secrets, OS and Office junk
 .claude/
 .vscode/
 .env
@@ -47,3 +47,8 @@ credentials*.json
 Thumbs.db
 desktop.ini
 .DS_Store
+
+# Personal working notes (kept locally, not published)
+docs/PLAN.md
+docs/CHALLENGES.md
+docs/DASHBOARDS.md
