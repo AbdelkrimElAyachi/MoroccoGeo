@@ -52,7 +52,7 @@ Sources (CHIRPS, Open-Meteo, MODIS, JRC/Sentinel-2, FAOSTAT, HCP, geoBoundaries)
 
 ## How to rebuild from scratch
 
-1. Install the environment (see `docs/JOURNAL.md`, Phase 0)
+1. Install SQL Server 2025 (engine, Agent, SSIS, SSAS Tabular), SSMS, Visual Studio with the SSIS / Analysis Services extensions, Power BI Desktop and Python 3
 2. Run the scripts in `sql/` in number order, in SSMS
 3. Create the Python environment:
    `python -m venv venv` then
@@ -62,7 +62,6 @@ Sources (CHIRPS, Open-Meteo, MODIS, JRC/Sentinel-2, FAOSTAT, HCP, geoBoundaries)
 
 ## Documents
 
-- [Project journal](docs/JOURNAL.md): what was done, when, and why
 - [Data sources](docs/DATA_SOURCES.md): verified sources, links and known limits
 - [Warehouse](docs/WAREHOUSE.md): star schema diagram, design decisions and data dictionary
 - [Model](docs/MODEL.md): SSAS Tabular model, measures and reconciliation with SQL

@@ -10,7 +10,7 @@
 --
 -- Partitioning by year (planned in Step 12) is NOT used on purpose: the largest table has about
 -- 1 million rows (daily weather); partitioning helps from tens of millions of rows and would only
--- add complexity here. Documented in docs/JOURNAL.md.
+-- add complexity here.
 -- =============================================================
 USE DWH_DB;
 GO

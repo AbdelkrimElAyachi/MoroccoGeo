@@ -403,7 +403,7 @@ depuis 2014 (136 mm en moyenne par province).</p>
 <li>geoBoundaries, Maroc ADM2 (github.com/wmgeolab/geoBoundaries)</li>
 <li>Méthode SPI : OMM, <i>Standardized Precipitation Index User Guide</i> (OMM-n° 1090, 2012)</li>
 </ul>
-<p>Documents du projet : <code>docs/JOURNAL.md</code> (journal daté), <code>docs/DATA_SOURCES.md</code>,
+<p>Documents du projet : <code>docs/DATA_SOURCES.md</code>,
 <code>docs/WAREHOUSE.md</code>, <code>docs/MODEL.md</code>.</p>
 """
 
