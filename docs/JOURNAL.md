@@ -411,3 +411,12 @@ in `DroughtObservatory.SemanticModel/` were all zeros (same save time 2026-11-19
 TempSaves copy. Report definition (page 1, 7 visuals) intact. Backed up the folder, rebuilt `.pbip`
 (artifact = report) and `definition.pbir` (version 4.0, `byConnection` "Data Source=localhost;Initial
 Catalog=DroughtModel"), renamed the semantic-model folder to `.damaged` (ignored by Git).
+Power BI refused it ("semanticModelId required"), then refused version 1.0 `analysisServicesDatabase`
+("Invalid connection type"). Also the `.pbip` disappeared after a failed open and was recreated.
+**2026-11-21, fixed:** the user saved a blank live-connected test project (`powerbi_test/Test.pbip`). Power BI
+2.159 format: `definition.pbir` = version 4.0 `byPath` → `../<name>.SemanticModel`; the model folder holds
+`modelReference.json` (version 2.0, `connectionType: analysisServicesDatabaseLive`, connection string
+`Data Source=localhost;Initial Catalog=DroughtModel;Cube=Model`), `definition.pbism` (4.2), `.platform`.
+Rebuilt `DroughtObservatory.SemanticModel` from it (original `diagramLayout.json` kept, new logicalId),
+pointed the report to it, removed the `.damaged` folder (backup in the scratchpad). 23 files valid.
+**Confirmed by the user: DroughtObservatory.pbip opens with page 1.** Test project deleted.

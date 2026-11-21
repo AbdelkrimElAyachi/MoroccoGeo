@@ -1,0 +1,154 @@
+{
+  "version": "1.1.0",
+  "diagrams": [
+    {
+      "ordinal": 0,
+      "scrollPosition": {
+        "x": 0,
+        "y": 0
+      },
+      "nodes": [
+        {
+          "location": {
+            "x": 894.24222311111612,
+            "y": 982.82549962011672
+          },
+          "nodeIndex": "Crop Production",
+          "size": {
+            "height": 300,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 826.04540728659708,
+            "y": -50
+          },
+          "nodeIndex": "Rainfall",
+          "size": {
+            "height": 272,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 1025.0938378148082,
+            "y": 275.45323082351774
+          },
+          "nodeIndex": "Vegetation",
+          "size": {
+            "height": 300,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 1062.7144494427826,
+            "y": 629.12983367249126
+          },
+          "nodeIndex": "Weather",
+          "size": {
+            "height": 300,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 1102.8748188656516,
+            "y": 1336.3009445598757
+          },
+          "nodeIndex": "Crop",
+          "size": {
+            "height": 248,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 475.21885711766936,
+            "y": -25.923970423542414
+          },
+          "nodeIndex": "Dam",
+          "size": {
+            "height": 248,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 679.30266837136537,
+            "y": 629.10451336966116
+          },
+          "nodeIndex": "Date",
+          "size": {
+            "height": 300,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 337.06323547581815,
+            "y": 625.18940667335551
+          },
+          "nodeIndex": "Drought",
+          "size": {
+            "height": 300,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 50,
+            "y": 875.48003153982927
+          },
+          "nodeIndex": "Drought Category",
+          "size": {
+            "height": 248,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 738.30098132668843,
+            "y": 275.54112263927095
+          },
+          "nodeIndex": "Province",
+          "size": {
+            "height": 300,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 290.55371434678329,
+            "y": 275.43016553383859
+          },
+          "nodeIndex": "Reservoir",
+          "size": {
+            "height": 296,
+            "width": 234
+          },
+          "zIndex": 0
+        }
+      ],
+      "name": "Toutes les tables",
+      "zoomValue": 100,
+      "pinKeyFieldsToTop": false,
+      "showExtraHeaderInfo": false,
+      "hideKeyFieldsWhenCollapsed": false,
+      "tablesLocked": false
+    }
+  ],
+  "selectedDiagram": "Toutes les tables",
+  "defaultDiagram": "Toutes les tables"
+}

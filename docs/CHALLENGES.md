@@ -255,9 +255,16 @@ Updated as the project goes on (newest at the end of each section).
 - **Cause:** 6 small files saved at the same second (21:46:39) were filled with zeros, most likely by the
   abrupt shutdown while Power BI was writing them: the `.pbip` shortcut, `definition.pbir` (the live connection
   to SSAS) and 4 files of the semantic-model reference. The report itself (page 1, 7 visuals) was intact.
-- **Fix:** scanned every file for "all zeros", backed up the folder, rebuilt the two essential files from the
-  standard PBIP format (shortcut → `DroughtObservatory.Report`; live connection → `localhost` / `DroughtModel`),
-  set the damaged model-reference folder aside (not needed for a live connection).
+- **Fix, first attempts:** scanned every file for "all zeros", backed up the folder, rebuilt the `.pbip`
+  shortcut, then guessed the connection file format twice from documentation (version 4.0 `byConnection`,
+  then version 1.0 `analysisServicesDatabase`): both refused by Power BI 2.159.
+- **Fix that worked:** let Power BI write the format itself. A blank report, live-connected to `DroughtModel`
+  and saved as a test project, showed that this version stores a live connection in two parts: the report's
+  `definition.pbir` points to a model folder (`byPath`), whose `modelReference.json` holds the connection
+  (`analysisServicesDatabaseLive`, `localhost` / `DroughtModel`). The model folder was rebuilt from it, keeping
+  the original diagram layout. All 23 project files validated (valid JSON, no zeros).
+- **Lesson 2:** when a file format is undocumented or version-specific, generate a reference from the tool
+  instead of guessing.
 - **Lesson:** the `powerbi/` folder had never been committed, so Git could not restore it. Commit dashboard
   work like code, as soon as a page works.
 
