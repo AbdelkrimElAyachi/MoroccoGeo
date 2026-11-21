@@ -96,6 +96,7 @@ the 2024 census population. Data up to **{last_month}**.
 | SPI-12 statistics | WMO definition | mean 0.000, standard deviation 1.001 over 1991-2020: PASS |
 | Lake surfaces, two satellites | Landsat (JRC) vs Sentinel-2, 2017-2021 | correlation 0.997, totals within 1.3 %: PASS |
 | Reservoir trend | Official fill rates (Ministry of Equipment and Water) | same order on Feb 2024 < Jan 2026 < May 2026: PASS |
+| Farmland greenness vs harvest | Official wheat yield (FAOSTAT), 2001-2024 | March NDVI correlation 0.86; the 5 worst harvests (2007, 2020, 2005, 2022, 2016) all had below-median greenness: PASS |
 | Completeness | - | 75 provinces every month and every day, no negative rain, no duplicates: PASS |
 
 ### 2. Real rain gauges (NOAA GHCN-Daily)
@@ -141,6 +142,33 @@ Tangier 0.90, Nouasseur 0.86, Marrakech 0.85, Oujda 0.73, Ouarzazate 0.64, Midel
      months are complete enough to compare.
 - **Recommendation:** use the dry interior and Saharan provinces as a trend indicator (SPI-12, seasons),
   not as exact monthly values. Near the -1 drought line, a small difference can flip a drought call.
+
+### 3. Real thermometers (NOAA GHCN-Daily)
+
+Daily maximum temperature in `weather_daily.csv` (Open-Meteo, one representative point per province) was compared
+with the thermometers of the same NOAA stations (values with a quality flag removed). Two measures: monthly means,
+and daily anomalies (each day minus its normal for that calendar day, so the seasons cannot inflate the score).
+Rules fixed before the run: monthly r median >= 0.95 and every station >= 0.90; daily anomalies median >= 0.70 and
+every station >= 0.50 (stations with >= 60 complete months are judged).
+
+| Station | km to weather point | Monthly r | Daily anomaly r | Mean difference |
+|---|---|---|---|---|
+| Meknès | 14 | 0.997 | 0.954 | -0.2 °C |
+| Ouarzazate | 35 | 0.997 | 0.927 | -4.4 °C |
+| Oujda | 16 | 0.995 | 0.914 | -1.5 °C |
+| Midelt | 22 | 0.987 | 0.868 | -6.4 °C |
+| Tétouan | 20 | 0.982 | 0.599 | -2.0 °C |
+| Salé (Rabat) | 12 | 0.977 | 0.869 | +0.3 °C |
+| Essaouira | 17 | 0.685 | 0.356 | +4.3 °C |
+| Marrakech, Casablanca-Anfa, Nouasseur, Tangier (fewer complete months, not judged) | 4-25 | 0.97-0.997 | 0.85-0.96 | -1.6 to +0.5 °C |
+
+**Result:** medians pass easily (monthly 0.987, daily anomalies 0.869), but the rule "every station" fails because
+of **Essaouira**. This is a real climate difference, not a data error: the station is on the ocean, where the cold
+coastal current keeps summer maximums at 21-22 °C all year, while the province's weather point is 17 km inland,
+where July reaches 31.7 °C. In the same way, the mean differences at Midelt (-6.4 °C) and Ouarzazate (-4.4 °C) come
+from altitude: the weather point and the station are not at the same height. **Use:** the weather columns describe
+the province's representative point; for coastal cities and mountain towns, expect an offset of a few degrees, but
+the day-to-day and year-to-year changes are reliable.
 
 ## Sources and licences
 
