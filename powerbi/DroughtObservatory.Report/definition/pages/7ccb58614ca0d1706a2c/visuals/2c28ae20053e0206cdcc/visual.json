@@ -2,12 +2,12 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.14.0/schema.json",
   "name": "2c28ae20053e0206cdcc",
   "position": {
-    "x": 10,
-    "y": 250,
-    "z": 6,
+    "x": 19.5999755859375,
+    "y": 459.60003662109375,
+    "z": 6000,
     "height": 595,
     "width": 434,
-    "tabOrder": 6
+    "tabOrder": 6000
   },
   "visual": {
     "visualType": "shapeMap",
@@ -214,79 +214,5 @@
       ]
     },
     "drillFilterOtherVisuals": true
-  },
-  "filterConfig": {
-    "filters": [
-      {
-        "name": "d4fa4eea58879e5d1511",
-        "field": {
-          "Column": {
-            "Expression": {
-              "SourceRef": {
-                "Entity": "Province"
-              }
-            },
-            "Property": "ProvinceShort"
-          }
-        },
-        "type": "Categorical"
-      },
-      {
-        "name": "df854ab6a0668a4a87b0",
-        "field": {
-          "Measure": {
-            "Expression": {
-              "SourceRef": {
-                "Entity": "Drought"
-              }
-            },
-            "Property": "SPI-12 Latest Month"
-          }
-        },
-        "type": "Advanced"
-      },
-      {
-        "name": "217525d2b61a070e7470",
-        "field": {
-          "Measure": {
-            "Expression": {
-              "SourceRef": {
-                "Entity": "Drought"
-              }
-            },
-            "Property": "Drought Category (latest)"
-          }
-        },
-        "type": "Advanced"
-      },
-      {
-        "name": "05b0c2e76c455772960a",
-        "field": {
-          "Measure": {
-            "Expression": {
-              "SourceRef": {
-                "Entity": "Rainfall"
-              }
-            },
-            "Property": "Rain % of Normal"
-          }
-        },
-        "type": "Advanced"
-      },
-      {
-        "name": "14c65e811d1031ee680b",
-        "field": {
-          "Measure": {
-            "Expression": {
-              "SourceRef": {
-                "Entity": "Province"
-              }
-            },
-            "Property": "Population 2024"
-          }
-        },
-        "type": "Advanced"
-      }
-    ]
   }
 }

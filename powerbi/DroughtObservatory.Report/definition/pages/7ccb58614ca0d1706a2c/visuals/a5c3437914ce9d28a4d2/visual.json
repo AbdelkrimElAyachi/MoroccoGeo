@@ -2,12 +2,12 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.14.0/schema.json",
   "name": "a5c3437914ce9d28a4d2",
   "position": {
-    "x": 10,
-    "y": 81,
-    "z": 2,
+    "x": 19.5999755859375,
+    "y": 290.60003662109375,
+    "z": 2000,
     "height": 150,
     "width": 194,
-    "tabOrder": 2
+    "tabOrder": 2000
   },
   "visual": {
     "visualType": "cardVisual",
@@ -81,23 +81,5 @@
       ]
     },
     "drillFilterOtherVisuals": true
-  },
-  "filterConfig": {
-    "filters": [
-      {
-        "name": "71d53eb026c0b0e3dc3b",
-        "field": {
-          "Measure": {
-            "Expression": {
-              "SourceRef": {
-                "Entity": "Drought"
-              }
-            },
-            "Property": "% Provinces in Drought"
-          }
-        },
-        "type": "Advanced"
-      }
-    ]
   }
 }

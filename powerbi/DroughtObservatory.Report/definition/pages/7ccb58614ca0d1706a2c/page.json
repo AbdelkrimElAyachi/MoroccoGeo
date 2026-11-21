@@ -1,7 +1,7 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/page/2.1.0/schema.json",
   "name": "7ccb58614ca0d1706a2c",
-  "displayName": "Page 1",
+  "displayName": "Vue d'ensemble",
   "displayOption": "FitToPage",
   "height": 1080,
   "width": 1920,
