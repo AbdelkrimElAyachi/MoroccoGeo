@@ -50,6 +50,7 @@ Phase 3 tests: `sql/tests/phase3_tests.sql` (12 checks), `ssis/tests/run_rerun_c
 |---|---|---|---|
 | 13 | SSAS Tabular model + DAX | measures match SQL queries; wheat 2024 = 2,441,670 t; Excel connects | ✅ (13 reconciliation checks; Excel: to try) |
 | 14 | Power BI, 6 pages | each page answers its user's question; 75 provinces on map; filters work | ⏳ |
+| 14b | Public web dashboard (GitHub Pages) | web data = SQL (9 checks); map shows 75 provinces; selectors give the warehouse answer (Aug 2022: 61 provinces, 33.1 M people); works on phone width | ✅ locally (online after push) |
 | 15 | Yield forecast | leave-one-year-out error reported; 2024 predicted as bad year | ⏳ |
 | 16 | Monthly PDF bulletin (Power BI Report Server) + alerts | correct figures for 3 months; alert fires in test | ⏳ |
 

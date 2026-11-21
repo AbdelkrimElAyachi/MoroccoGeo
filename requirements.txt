@@ -7,3 +7,5 @@ pandas        # tables and CSV output
 scipy         # SPI drought index (gamma fit)
 openpyxl      # read the HCP census Excel file
 earthengine-api  # Google Earth Engine (MODIS NDVI, Sentinel-2), project "droughtmorocco"
+pyodbc        # read DWH_DB for the web export (scripts/11_export_web.py)
+topojson      # province map for Power BI and the website (scripts/tools/make_topojson.py)

@@ -420,3 +420,18 @@ Power BI refused it ("semanticModelId required"), then refused version 1.0 `anal
 Rebuilt `DroughtObservatory.SemanticModel` from it (original `diagramLayout.json` kept, new logicalId),
 pointed the report to it, removed the `.damaged` folder (backup in the scratchpad). 23 files valid.
 **Confirmed by the user: DroughtObservatory.pbip opens with page 1.** Test project deleted.
+
+## 2026-11-21: Public web dashboard (Step 14b)
+
+Power BI reports need our local SSAS server, so nobody outside this PC can open them. Added a public
+static website published by GitHub Pages:
+- `scripts/11_export_web.py` exports DWH_DB into `web/data/` (provinces, map, SPI-12 matrix, monthly rain
+  + normals, national yearly series, dams, CSV downloads): 75 provinces, 419 SPI months, 430 rain months,
+  323 dam months, 36 years, 4.6 MB.
+- `web/index.html` + `app.js` + `style.css` (French): year/month selectors, 4 key cards, province map,
+  12 driest provinces, 5 national charts, downloads, method and sources.
+- `scripts/tools/check_web_export.py`: 9 checks web vs SQL. First run 8/9 (Settat rain 2024 243.1 vs 243.2,
+  rounding before summing); fixed to 2 decimals → **ALL WEB EXPORT CHECKS PASSED**.
+- Browser preview: map was one filled rectangle (72 wrong-direction slivers in Oued Ed-Dahab); fixed in
+  `app.js`. Aug 2022 on the site = 61 provinces / 33.1 M people = SQL. No horizontal scroll at 375 px.
+- `.github/workflows/pages.yml` publishes `web/` on every push to main. Details: CHALLENGES 4.9.

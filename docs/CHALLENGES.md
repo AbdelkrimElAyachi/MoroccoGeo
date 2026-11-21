@@ -268,6 +268,23 @@ Updated as the project goes on (newest at the end of each section).
 - **Lesson:** the `powerbi/` folder had never been committed, so Git could not restore it. Commit dashboard
   work like code, as soon as a page works.
 
+### 4.9 Making the dashboards public: two small bugs caught before publishing
+- **Problem:** Power BI reports live on this PC (live connection to the local SSAS model), so the jury,
+  the teacher or the public cannot open them without our server.
+- **Solution:** a static website (`web/`) published free by GitHub Pages. A script exports the warehouse
+  into small JSON/CSV files (4.6 MB); the page draws the map and charts in the browser.
+- **Bug 1, caught by the check script:** `check_web_export.py` compares 9 numbers with SQL. Settat rain 2024:
+  SQL 243.2 mm, website 243.1 mm. **Cause:** monthly rain was rounded to 1 decimal *before* adding 12 months,
+  so rounding errors added up. **Fix:** keep 2 decimals like the warehouse → 243.2 = 243.2, 9/9 PASS.
+- **Bug 2, seen in the browser preview:** the map was one big blue rectangle. **Cause:** the map simplification
+  left 72 tiny 3-point slivers (out of 1,314 coastal pieces of Oued Ed-Dahab) drawn in the wrong direction;
+  the map library then reads such a piece as "the whole globe except this piece" and paints everything.
+  **Fix:** the page reverses only the pieces whose area is larger than half the globe. All 75 provinces show.
+- **Evidence:** August 2022 on the website: 81.3 % of provinces (61/75) and 33.1 M people in drought, the
+  same as the SQL query.
+- **Lesson:** a new output (website) gets the same treatment as the model: an automatic comparison with SQL,
+  plus looking at it before publishing.
+
 ## 5. Tools and environment
 
 | Problem | Cause | Solution |

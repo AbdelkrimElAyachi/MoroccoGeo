@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Observatoire de la sécheresse au Maroc</title>
+  <meta name="description" content="Sécheresse, pluie, barrages et récoltes au Maroc par province, 1991-2026, à partir de données satellitaires et officielles ouvertes.">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <h1>Observatoire de la sécheresse au Maroc</h1>
+    <p class="sub">Pluie, sécheresse, barrages et récoltes par province, 1991-2026 · données satellitaires et officielles ouvertes</p>
+    <p class="updated" id="updated">Chargement des données…</p>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="controls" aria-label="Choix de la période">
+    <label>Année <select id="year"></select></label>
+    <label>Mois <select id="month"></select></label>
+    <span class="hint">La carte et les indicateurs montrent la situation à la fin du mois choisi.</span>
+  </section>
+
+  <section class="cards" aria-label="Indicateurs clés">
+    <article class="card"><h2>Provinces en sécheresse</h2><p class="big" id="k-prov">–</p><p class="note" id="k-prov-n"></p></article>
+    <article class="card"><h2>Population concernée</h2><p class="big" id="k-people">–</p><p class="note">population 2024 (HCP) des provinces en sécheresse</p></article>
+    <article class="card"><h2>Pluie vs normale</h2><p class="big" id="k-rain">–</p><p class="note" id="k-rain-n"></p></article>
+    <article class="card"><h2>Barrages (surface d'eau)</h2><p class="big" id="k-dams">–</p><p class="note" id="k-dams-n"></p></article>
+  </section>
+
+  <section class="grid2">
+    <article class="panel">
+      <h2>Sécheresse par province (SPI-12)</h2>
+      <div id="map" class="map" role="img" aria-label="Carte des provinces colorées par niveau de sécheresse"></div>
+      <div class="legend" id="legend"></div>
+      <div id="tip" class="tip" hidden></div>
+    </article>
+    <article class="panel">
+      <h2>Provinces les plus sèches</h2>
+      <table class="tbl" id="table">
+        <thead><tr><th>Province</th><th>Région</th><th class="num">SPI-12</th><th>Catégorie</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </article>
+  </section>
+
+  <section class="panel">
+    <h2>SPI-12 moyen national depuis 1991 <span class="muted">(rouge ≤ -1 = sécheresse, bleu ≥ 1 = humide)</span></h2>
+    <div class="chart"><canvas id="c-spi"></canvas></div>
+  </section>
+
+  <section class="grid2">
+    <article class="panel">
+      <h2>Pluie annuelle en % de la normale 1991-2020</h2>
+      <div class="chart"><canvas id="c-rain"></canvas></div>
+    </article>
+    <article class="panel">
+      <h2>Surface d'eau des 26 grands barrages (km²)</h2>
+      <div class="chart"><canvas id="c-dams"></canvas></div>
+    </article>
+  </section>
+
+  <section class="grid2">
+    <article class="panel">
+      <h2>Blé : production et verdure des cultures en mars</h2>
+      <div class="chart"><canvas id="c-wheat"></canvas></div>
+    </article>
+    <article class="panel">
+      <h2>Température maximale moyenne (°C)</h2>
+      <div class="chart"><canvas id="c-temp"></canvas></div>
+    </article>
+  </section>
+
+  <section class="panel text">
+    <h2>Télécharger les données</h2>
+    <ul class="dl">
+      <li><a href="data/csv/spi12_province_month.csv" download>SPI-12 par province et par mois</a></li>
+      <li><a href="data/csv/rain_province_month.csv" download>Pluie mensuelle par province (+ normale 1991-2020)</a></li>
+      <li><a href="data/csv/national_yearly.csv" download>Séries nationales annuelles</a></li>
+      <li><a href="data/csv/dams_month.csv" download>Surface d'eau mensuelle des barrages</a></li>
+      <li><a href="data/csv/provinces.csv" download>Provinces et population 2024</a></li>
+    </ul>
+  </section>
+
+  <section class="panel text">
+    <h2>Méthode en bref</h2>
+    <ul>
+      <li><b>SPI-12</b> (indice de précipitations standardisé) : pluie des 12 derniers mois comparée à la période de référence 1991-2020 (méthode OMM). 0 = normal, ≤ -1 = sécheresse, ≤ -2 = sécheresse extrême.</li>
+      <li><b>Pluie vs normale</b> : pluie de janvier au mois choisi, comparée à la moyenne 1991-2020 des mêmes mois.</li>
+      <li><b>Barrages</b> : surface d'eau mesurée par satellite (Landsat/JRC 2000-2016, Sentinel-2 depuis 2017), en % de la plus grande surface observée. C'est une surface, pas un volume.</li>
+      <li><b>Population concernée</b> : population 2024 des provinces en sécheresse (même chiffre pour toutes les années).</li>
+    </ul>
+  </section>
+
+  <section class="panel text">
+    <h2>Sources et licences</h2>
+    <ul class="src">
+      <li>Pluie : CHIRPS v3, Climate Hazards Center, UC Santa Barbara</li>
+      <li>Météo : Open-Meteo (réanalyse ERA5, Copernicus), CC BY 4.0</li>
+      <li>Végétation : NASA MODIS MOD13Q1 ; occupation du sol ESA WorldCover</li>
+      <li>Barrages : Copernicus Sentinel-2 ; JRC Global Surface Water ; contours © contributeurs OpenStreetMap (ODbL)</li>
+      <li>Provinces : geoBoundaries (ODbL) ; population : HCP, RGPH 2024</li>
+      <li>Récoltes : FAOSTAT, FAO (CC BY 4.0)</li>
+    </ul>
+    <p class="muted">Projet académique (MSBI : SSIS, SQL Server, SSAS, Power BI). Cette page est une version web légère du tableau de bord Power BI, générée à partir du même entrepôt de données.</p>
+  </section>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/topojson-client@3.1.0/dist/topojson-client.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
