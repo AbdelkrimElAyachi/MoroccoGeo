@@ -52,3 +52,6 @@ docs/CHALLENGES.md
 docs/DASHBOARDS.md
 docs/JOURNAL.md
 docs/report/
+
+# Kaggle dataset export (rebuilt by scripts/12_export_kaggle.py)
+kaggle/

@@ -65,3 +65,10 @@ Sources (CHIRPS, Open-Meteo, MODIS, JRC/Sentinel-2, FAOSTAT, HCP, geoBoundaries)
 - [Data sources](docs/DATA_SOURCES.md): verified sources, links and known limits
 - [Warehouse](docs/WAREHOUSE.md): star schema diagram, design decisions and data dictionary
 - [Model](docs/MODEL.md): SSAS Tabular model, measures and reconciliation with SQL
+
+## Authors
+
+- Abdelkrim El Ayachi
+- Othmane El Khassouani
+
+MSBI school project, ISGA, 2026-2027.
