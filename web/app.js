@@ -40,6 +40,10 @@ function setupControls() {
   const ySel = document.getElementById("year"), mSel = document.getElementById("month");
   ySel.innerHTML = years.map(y => `<option>${y}</option>`).join("");
   ySel.value = last.slice(0, 4);
+  // shareable links: ?year=2022&month=8 opens that month
+  const qs = new URLSearchParams(location.search);
+  if (years.includes(+qs.get("year"))) ySel.value = qs.get("year");
+  if (qs.get("month")) mSel.innerHTML = `<option value="${+qs.get("month")}"></option>`;
   const fillMonths = () => {
     const y = ySel.value;
     const avail = D.spi12.months.filter(m => m.startsWith(y)).map(m => +m.slice(5));
