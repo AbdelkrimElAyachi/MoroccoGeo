@@ -52,6 +52,9 @@ docs/CHALLENGES.md
 docs/DASHBOARDS.md
 docs/JOURNAL.md
 docs/report/
+docs/SSIS_GUIDE.md
+docs/RUN_EXPLAINED.md
 
 # Kaggle dataset export (rebuilt by scripts/12_export_kaggle.py)
 kaggle/
+CLAUDE_TRANSFER.md
